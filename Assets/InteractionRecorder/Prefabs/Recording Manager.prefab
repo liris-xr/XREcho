@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6587483593470092043
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6152862135145303992}
+  - component: {fileID: 1429265687}
+  m_Layer: 0
+  m_Name: Recording Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6152862135145303992
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6587483593470092043}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.1087666, y: 1.4514043, z: -1.5834411}
+  m_LocalScale: {x: 1, y: 100, z: 99.99997}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1429265687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6587483593470092043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4760d8e76c5c2fb47b3ae6b4597f1b23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackedObjects:
+  - obj: {fileID: 0}
+    objPath: /Player/SteamVRObjects/VRCamera
+    position: 1
+    rotation: 1
+    camera: 1
+    trackingRate: 100
+    trackingInterval: 0
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayPrefab: {fileID: 0}
+    replayScripts:
+    - ShowCameraFrustum
+  - obj: {fileID: 0}
+    objPath: /Player/SteamVRObjects/LeftHand/LeftRenderModel Slim(Clone)
+    position: 1
+    rotation: 1
+    camera: 0
+    trackingRate: 100
+    trackingInterval: 0
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayPrefab: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Player/SteamVRObjects/RightHand/RightRenderModel Slim(Clone)
+    position: 1
+    rotation: 1
+    camera: 0
+    trackingRate: 100
+    trackingInterval: 0
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayPrefab: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Eye
+    position: 1
+    rotation: 1
+    camera: 0
+    trackingRate: 100
+    trackingInterval: 0
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayPrefab: {fileID: 0}
+    replayScripts:
+    - ShowGaze
+  trackedData:
+  - trackingScriptName: TrackPupilDiameter
+    trackingRate: 100
+    trackedDataName: 
+    trackingInterval: 0
+    timeSinceLastWrite: 0
+    lastData: []
+    replayScripts: []
+  showControlPoints: 0
+  controlPointsDistance: 0.3
+  controlPointsRate: 10
+  autoStartRecording: 0
+  recordKey: 115
+  recordKeyCooldown: 0.1
+  savePath: D:\House\Assets\Replayer\Recordings
+  project: debug
+  session: 04mai
+  formatExportType: 0
+  trackValveVRInteractable: 1
+  interactableTrackingRate: 100
