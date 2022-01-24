@@ -223,6 +223,7 @@ class ObjectHeatmapData
             Debug.Log("objByTexWidth =  " + objByTexWidth + ", objByTexHeight = " + objByTexHeight);
             Debug.Log("final obj coords = " + finalObjCoords);
             Debug.Log("objWidth = " + objWidth + ", objHeight = " + objHeight);
+            Debug.Log(e);
         }
     }
 

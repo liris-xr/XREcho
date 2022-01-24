@@ -10,22 +10,29 @@ public class TrajectoryManager : MonoBehaviour
 {
     private static TrajectoryManager instance;
 
+    public float minDistanceInterval = 0.3f;
+    public float minTimeInterval = 0.1f;
+
+    [Header("Trajectories Display")]
+    public bool showTrajectories;
     public float radius = 0.03f;
     public int nbRadialSegments = 8;
     public bool closed = false;
-
-    [Header("Display")]
-    public bool showTrajectories;
-    public void ToggleTrajectories() { showTrajectories = !showTrajectories; CheckTrajectoriesVisibility(); }
-    public bool showControlPoints;
-    public void ToggleControlPoints() { showControlPoints = !showControlPoints; CheckControlPointsVisibility(); }
-    public float sphereSize = 0.1f;
-
-    [Header("Trajectory colors")]
     public int numberOfColors = 3;
     public Color startingColor = Color.HSVToRGB(0f, 0.8f, 1.0f);
 
+    [Header("Control Points Display")]
+    public bool showControlPoints;
+    public float sphereSize = 0.1f;
+
+    public void SetShowTrajectories(bool shouldShow) { showTrajectories = shouldShow; CheckTrajectoriesVisibility(); }
+    public void SetShowControlPoints(bool shouldShow) { showControlPoints = shouldShow; CheckControlPointsVisibility(); }
+    public void ToggleTrajectories() { showTrajectories = !showTrajectories; CheckTrajectoriesVisibility(); }
+    public void ToggleControlPoints() { showControlPoints = !showControlPoints; CheckControlPointsVisibility(); }
+
     private int nbTrajectories;
+    private bool didShowTrajectories;
+    private bool didShowControlPoints;
 
     private GameObject trajectoryObject;
     private List<GameObject> trajectories;
@@ -37,6 +44,9 @@ public class TrajectoryManager : MonoBehaviour
 
     private void Awake()
     {
+        didShowTrajectories = showTrajectories;
+        didShowControlPoints = showControlPoints;
+
         if (instance)
             Debug.LogError("2 Trajectory Managers: singleton design pattern broken");
 
@@ -46,8 +56,6 @@ public class TrajectoryManager : MonoBehaviour
 
     public void InitTrajectories()
     {
-        showTrajectories = false;
-        showControlPoints = false;
         nbTrajectories = 0;
         trajectories = new List<GameObject>();
         curves = new List<CatmullRomCurve>();
@@ -110,7 +118,7 @@ public class TrajectoryManager : MonoBehaviour
 
         NewCPSphere(i, cp);
     }
-
+    
     private void NewCPSphere(int i, Vector3 position)
     {
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -166,6 +174,28 @@ public class TrajectoryManager : MonoBehaviour
             trajectories[i].GetComponent<MeshRenderer>().material.color = ColorGenerator.GetNthColor(i, numberOfColors, startingColor);
     }
 
+    public void CheckVisibilities()
+    {
+        CheckTrajectoriesVisibility();
+        CheckControlPointsVisibility();
+    }
+
+    public void HidePreviousTrajectoriesForRecordMode()
+    {
+        if (showTrajectories)
+        {
+            showTrajectories = false;
+            CheckTrajectoriesVisibility();
+            showTrajectories = true;
+        }
+        if (showControlPoints)
+        {
+            showControlPoints = false;
+            CheckControlPointsVisibility();
+            showControlPoints = true;
+        }
+    }
+
     private void CheckTrajectoriesVisibility()
     {
         if (trajectories == null)
@@ -187,10 +217,17 @@ public class TrajectoryManager : MonoBehaviour
 
     private void OnValidate()
     {
+        if (!showTrajectories && didShowTrajectories)
+            showControlPoints = false;
+        else if (showControlPoints && !didShowControlPoints)
+            showTrajectories = true;
         RebuildTubularMeshes();
         ChangeCPSphereSize();
         ChangeColors();
         CheckTrajectoriesVisibility();
         CheckControlPointsVisibility();
+
+        didShowTrajectories = showTrajectories;
+        didShowControlPoints = showControlPoints;
     }
 }

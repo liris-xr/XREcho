@@ -23,14 +23,15 @@ public class ReplayManager : MonoBehaviour
     public void JumpForwardBy(float _jumpForwardBy) { jumpForwardBy = _jumpForwardBy; }
 
     private float timeSinceStartOfReplay;
+    public float GetCurrentReplayTime() { return timeSinceStartOfReplay; }
     private float totalReplayTime;
-
-    public bool cloneEverything = true;
-    public float clonesTransparency = 0.5f;
+    public float GetTotalReplayTime() { return totalReplayTime; }
 
     private int targetDisplay;
     private Camera mainCamera;
+    public void SetMainCamera(Camera camera) { mainCamera = camera; }
     private Camera replayCamera;
+    private bool shouldChangeCamera;
 
     private int nbRecordings;
     public int GetNbRecording() { return nbRecordings; }
@@ -49,29 +50,18 @@ public class ReplayManager : MonoBehaviour
     private GameObject cloneObject;
     private List<GameObject> cloneByRecordingObjects;
 
-    [Header("Trajectories")]
-    public float controlPointsDistance = 0.3f;
-    public float controlPointsRate = 10;
-    private float controlPointsInterval;
-
-    [Header("Controls")]
-    public bool autoStartReplaying = false;
-    public bool keepReplayingOnNewScene = true;
-    public KeyCode readKey = KeyCode.R;
-    public KeyCode replayKey = KeyCode.P;
-
-    public float readKeyCooldown = 0.1f;
-    public float replayKeyCooldown = 0.1f;
-
-    private float timeSinceReadKeyHit;
-    private float timeSinceReplayKeyHit;
-
+    public bool cloneEverything = true;
+    public float clonesTransparency = 0.5f;
+    [Space(8)]
+    public KeyCode replayShortcut = KeyCode.P;
+    private float recAlpha = 1.0f;
+    
+    private bool keepReplayingOnNewScene;
     private bool replayingOnSceneUnloaded;
 
     private ExpeRecorderConfig config;
     private TrajectoryManager trajectoryManager;
     private RecordingManager recordingManager;
-    private CanvasManager canvasManager;
     private System.Diagnostics.Stopwatch stopWatch;
 
     private void Awake()
@@ -90,22 +80,62 @@ public class ReplayManager : MonoBehaviour
 
         trajectoryManager = TrajectoryManager.GetInstance();
         recordingManager = RecordingManager.GetInstance();
-        canvasManager = CanvasManager.GetInstance();
         config = ExpeRecorderConfig.GetInstance();
-
-        timeSinceReadKeyHit = readKeyCooldown;
-        timeSinceReplayKeyHit = replayKeyCooldown;
+        
         replaying = false;
-        controlPointsInterval = 1 / controlPointsRate;
         replayingOnSceneUnloaded = false;
         mainCamera = Camera.main;
+        replayCamera = null;
+        shouldChangeCamera = false;
 
         OnValidate();
 
-        if (autoStartReplaying)
+        XREcho xrecho = XREcho.GetInstance();
+        keepReplayingOnNewScene = xrecho.dontDestroyOnLoad;
+
+        if (xrecho.autoExecution == XREcho.AutoMode.AutoStartReplay && !xrecho.displayGUI)
         {
-            ReadRecordings();
+            ChangeCamera();
+            LoadAndReadLastRecord();
             StartReplaying();
+        }
+    }
+
+    private void OnGUI()
+    {
+        bool noGui = !XREcho.GetInstance().displayGUI;
+        if (Event.current.isKey && Event.current.type == EventType.KeyDown)
+        {
+            if (Event.current.keyCode == replayShortcut)
+            {
+                if (noGui)
+                    ChangeCamera();
+                if (replaying)
+                {
+                    StopReplaying();
+                }
+                else if (!recordingManager.IsRecording())
+                {
+                    LoadAndReadLastRecord();
+                    StartReplaying();
+                }
+            } else if (Event.current.keyCode == recordingManager.recordShortcut && replaying)
+            {
+                if (noGui)
+                    ChangeCamera();
+                StopReplaying();
+            }
+        }
+        if (noGui && replaying)
+        {
+            GUILayout.BeginArea(new Rect(10, 5, 200, 100));
+            recAlpha = (recAlpha + 0.01f) % 2.0f;
+            float curAlpha = recAlpha > 1.0f ? 2.0f - recAlpha : recAlpha;
+            GUI.color = new Color(0.0f, 0.8f, 0.0f, curAlpha);
+            string lab = "<size=30>[Play]</size>";
+            GUILayout.Label(lab);
+            GUI.color = Color.white;
+            GUILayout.EndArea();
         }
     }
 
@@ -116,6 +146,7 @@ public class ReplayManager : MonoBehaviour
         if (replayingOnSceneUnloaded)
         {
             replayingOnSceneUnloaded = false;
+            ReadObjectsDataFiles(GetObjectsDataFiles());
             ReadRecordings();
             StartReplaying();
         }
@@ -125,12 +156,10 @@ public class ReplayManager : MonoBehaviour
     {
         if (cloneObject != null)
             Destroy(cloneObject);
-
-        timeSinceReadKeyHit = 0;
+        
         totalReplayTime = 0;
 
         nbRecordings = 0;
-        objectsData = new List<List<Dictionary<string, object>>>();
         trackedObjects = new List<List<TrackedObject>>();
         actions = new List<List<TrackingAction>>();
 
@@ -138,11 +167,17 @@ public class ReplayManager : MonoBehaviour
         events = new List<List<string>>();
 
         clones = new List<List<GameObject>>();
-        trajectoryManager.InitTrajectories();
+        if (trajectoryManager != null) trajectoryManager.InitTrajectories();
     }
 
     public void ChangeCamera()
     {
+        if (replayCamera == null)
+        {
+            shouldChangeCamera = true;
+            return;
+        }
+
         int tmp;
         tmp = mainCamera.targetDisplay;
         mainCamera.targetDisplay = replayCamera.targetDisplay;
@@ -170,12 +205,29 @@ public class ReplayManager : MonoBehaviour
         return instance;
     }
 
-    private List<string> GetObjectsDataFiles()
+    public List<string> GetObjectsDataFiles()
     {
-        Debug.Log("Looking for recordings in " + config.GetSessionFolder());
-        DirectoryInfo dir = new DirectoryInfo(config.GetSessionFolder());
-        FileInfo[] objectsDataFilesInfo = dir.GetFiles("*objectsData" + config.GetFileSuffix() + ".csv");
+        return GetObjectsDataFiles(config.GetSessionFolder());
+    }
+
+    public List<string> GetObjectsDataFiles(string folderName)
+    {
+        Debug.Log("Looking for recordings in " + folderName);
+        DirectoryInfo dir;
+        FileInfo[] objectsDataFilesInfo;
         List<string> objectsDataFiles = new List<string>();
+
+        try
+        {
+            dir = new DirectoryInfo(folderName);
+            objectsDataFilesInfo = dir.GetFiles("*objectsData" + config.GetFileSuffix() + ".csv");
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            objectsDataFilesInfo = new FileInfo[] { };
+            Debug.Log("" + ex);
+        }
+        
         Debug.Log("Number of recordings found = " + objectsDataFilesInfo.Length);
 
         foreach (FileInfo f in objectsDataFilesInfo)
@@ -210,11 +262,9 @@ public class ReplayManager : MonoBehaviour
         paused = false;
         timeMultiplier = 1.0f;
         jumpForwardBy = 0;
-
-        canvasManager.StartReplaying();
+        
         stopWatch.Restart();
         timeSinceStartOfReplay = 0;
-        timeSinceReplayKeyHit = 0;
 
         ShowClones();
     }
@@ -381,28 +431,69 @@ public class ReplayManager : MonoBehaviour
             + " and difference = " + (timeSinceStartOfReplay - (float)systemSecondsElapsed));
 
         replaying = false;
-        canvasManager.StopReplaying();
+        replayCamera = null;
         HideClones();
     }
 
     public void TogglePause()
     {
         paused = !paused;
+    }
 
-        if (paused)
-            canvasManager.PauseReplaying();
-        else
-            canvasManager.StartReplaying();
+    private void LoadAndReadLastRecord()
+    {
+        List<string> cur = GetObjectsDataFiles();
+        List<string> toRead = new List<string> { cur[cur.Count - 1] };
+        ReadObjectsDataFiles(toRead);
+        ReadRecordings(toRead);
+    }
 
+    public void ReadObjectsDataFile(string folderName, int recordingId)
+    {
+        List<string> objectsDataFiles = GetObjectsDataFiles(folderName);
+        if (recordingId < 0 || recordingId >= objectsDataFiles.Count)
+        {
+            Debug.LogError("Error: no record file number " + recordingId + " found, aborting reading");
+            return;
+        }
+        ReadObjectsDataFiles(new List<string> { objectsDataFiles[recordingId] });
+    }
+
+    // out of readRecording (to be done asynchrously) : should be called before !
+    public void ReadObjectsDataFiles(List<string> objectsDataFiles)
+    {
+        objectsData = new List<List<Dictionary<string, object>>>();
+
+        foreach (string objectsDataFile in objectsDataFiles)
+        {
+            List<Dictionary<string, object>> data = CSVReader.ReadCSV(Path.Combine(config.GetSessionFolder(), objectsDataFile));
+            objectsData.Add(data);
+        }
+    }
+    
+    public void ReadRecording(string folderName, int recordingId)
+    {
+        List<string> objectsDataFiles = GetObjectsDataFiles(folderName);
+        if (recordingId < 0 || recordingId >= objectsDataFiles.Count)
+        {
+            Debug.LogError("Error: no record file number " + recordingId + " found, aborting reading");
+            return;
+        }
+        ReadRecordings(new List<string> { objectsDataFiles[recordingId] });
+    }
+
+    public void ReadRecordings()
+    {
+        ReadRecordings(GetObjectsDataFiles());
     }
 
     /*
-     * Reads all the recordings matching the project name and the session name used and prepares for replaying
-     */
-    public void ReadRecordings()
+    * Reads all the recordings matching the project name and the session name used and prepares for replaying
+    */
+    public void ReadRecordings(List<string> objectsDataFiles)
     {
         Reset();
-        List<string> objectsDataFiles = GetObjectsDataFiles();
+        //List<string> objectsDataFiles = GetObjectsDataFiles();
         List<TrackedObject> trackedObjectsList;
         List<TrackedData> trackedDataList;
         foreach (string objectsDataFile in objectsDataFiles)
@@ -426,7 +517,7 @@ public class ReplayManager : MonoBehaviour
             List<TrackingAction> actionList = RecordingManager.ComputeActions(trackedObjectsList, false);
             actions.Add(actionList);
 
-            LoadObjectsData(Path.Combine(config.GetSessionFolder(), objectsDataFile));
+            LoadObjectsData(Path.Combine(config.GetSessionFolder(), objectsDataFile), nbRecordings-1);
 
             /*
              * Loading Events Format And Data Files
@@ -451,9 +542,6 @@ public class ReplayManager : MonoBehaviour
         AddReplayScripts();
         //MakeClonesTransparent();
         HideClones();
-
-        canvasManager.SetTotalTime(totalReplayTime);
-        canvasManager.SetCurrentTime(0);
     }
 
     public void LoadObjectsFormat(string filepath, out List<TrackedObject> trackedObjects, out List<TrackedData> trackedData)
@@ -522,10 +610,9 @@ public class ReplayManager : MonoBehaviour
     /*
      * Reads a datafile and shows the trajectory of the first tracked object
      */
-    private void LoadObjectsData(string dataFilepath)
+    private void LoadObjectsData(string dataFilepath, int recId)
     {
-        List<Dictionary<string, object>> data = CSVReader.ReadCSV(dataFilepath);
-        objectsData.Add(data);
+        List<Dictionary<string, object>> data = objectsData[recId];
 
         if (data.Count != 0)
         {
@@ -533,9 +620,11 @@ public class ReplayManager : MonoBehaviour
             totalReplayTime = Mathf.Max(totalReplayTime, totalReplayTimeOfObjects);
         }
 
+        if (trajectoryManager == null)
+            return;
+
         float threshold = 0;
         bool firstFrame = true;
-
         List<Vector3> controlPoints = new List<Vector3>();
         for (int i = 0; i < data.Count; i++)
             if ((int)(float)data[i]["actionId"] == 0)
@@ -556,14 +645,13 @@ public class ReplayManager : MonoBehaviour
 
                     if (!firstFrame && controlPoints.Count == 0)
                         controlPoints.Add(position);
-                    else if (Vector3.Distance(position, controlPoints[controlPoints.Count - 1]) > controlPointsDistance)
+                    else if (Vector3.Distance(position, controlPoints[controlPoints.Count - 1]) > trajectoryManager.minDistanceInterval)
                         controlPoints.Add(position);
 
                     while (timestamp >= threshold)
-                        threshold += controlPointsInterval;
+                        threshold += trajectoryManager.minTimeInterval;
                 }
             }
-
         trajectoryManager.NewTrajectory(controlPoints);
     }
 
@@ -611,36 +699,36 @@ public class ReplayManager : MonoBehaviour
 
     private void Update()
     {
-        timeSinceReadKeyHit += Time.deltaTime;
-        timeSinceReplayKeyHit += Time.deltaTime;
-        timeSinceStartOfReplay += Time.deltaTime * timeMultiplier + jumpForwardBy;
-
-        //TODO : Convert to Action Based
-        //if (timeSinceReadKeyHit > readKeyCooldown && Input.GetKeyDown(readKey))
-        //    ReadRecordings();
-
-        //if (!replaying && Input.GetKeyDown(replayKey))
-        //    StartReplaying();
-
-        //if (timeSinceReplayKeyHit > replayKeyCooldown && Input.GetKeyDown(replayKey))
-        //    TogglePause();
-
-        if (!replaying || paused)
+        if (jumpForwardBy == 0 && (!replaying || paused))
             return;
 
-        canvasManager.SetCurrentTime(timeSinceStartOfReplay);
+        timeSinceStartOfReplay += jumpForwardBy != 0 ? jumpForwardBy : Time.deltaTime * timeMultiplier;
+
+        if (jumpForwardBy < 0)
+        {
+            for (int i = 0; i < nbRecordings; i++)
+            {
+                objectsIndices[i] = 0;
+                eventsIndices[i] = 0;
+            }
+        }
+
+        jumpForwardBy = 0;
 
         bool allFinishedPlaying = true;
         for (int i = 0; i < nbRecordings; i++)
             if (!ReplayData(i))
                 allFinishedPlaying = false;
 
-        jumpForwardBy = 0;
 
         if (allFinishedPlaying)
         {
-            canvasManager.SetCurrentTime(totalReplayTime);
-            StopReplaying();
+            paused = true;
+            if (!XREcho.GetInstance().displayGUI)
+            {
+                ChangeCamera();
+                StopReplaying();
+            }
         }
     }
 
@@ -730,6 +818,11 @@ public class ReplayManager : MonoBehaviour
                         camera.farClipPlane = rotation[0];
 
                         replayCamera = camera;
+                        if (shouldChangeCamera)
+                        {
+                            ChangeCamera();
+                            shouldChangeCamera = false;
+                        }
 
                         break;
 

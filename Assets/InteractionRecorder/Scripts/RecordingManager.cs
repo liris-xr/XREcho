@@ -63,8 +63,8 @@ public class RecordingManager : MonoBehaviour
 
     private bool recording;
     public bool IsRecording() { return recording; }
-    private float controlPointsInterval;
     private float timeSinceStartOfRecording;
+    public float GetTimeSinceStartOfRecording() { return timeSinceStartOfRecording; }
     private float timeSinceLastControlPoint;
     private int nbOriginalTrackedObjects;
 
@@ -75,31 +75,25 @@ public class RecordingManager : MonoBehaviour
     private CSVWriter eventsFormatWriter;
 
     private List<RecordingMetadata> metadata;
-    public List<TrackedObject> trackedObjects;
+    public List<TrackedObject> trackedObjects = new List<TrackedObject>();
     private List<TrackingAction> actions;
 
     private Dictionary<string, int> eventToId;
     private List<string> events;
-
-    [Header("Generic Settings")]
-    public bool autoStartRecording = false;
-    public bool keepRecordingOnNewScene = true;
+    
+    private bool keepRecordingOnNewScene = true;
     private bool recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
-    public bool trackXRInteractable = true;
-    public float interactableTrackingRate = 100;
-
-    [Header("Controls")]
-    public KeyCode recordKey = KeyCode.S;
-    public float recordKeyCooldown = 0.1f;
+    public bool trackXRInteractables = true;
+    public float interactablesTrackingRateHz = 100;
+    [Space(8)]
+    public KeyCode recordShortcut = KeyCode.S;
+    private float recordKeyCooldown = 0.4f;
+    private float recAlpha = 1.0f;
 
     private ExpeRecorderConfig config;
-    private CanvasManager canvasManager;
 
     // This code is used to display the trajectory while recording which can be useful to debug trajectories
-    [Header("Control Points")]
-    public bool showControlPoints = false;
-    public float controlPointsDistance = 0.3f;
-    public float controlPointsRate = 10;
+    public bool showControlPointsWhileRecording = false;
 
     private TrajectoryManager trajectoryManager;
     private int trajectoryIndex;
@@ -121,18 +115,34 @@ public class RecordingManager : MonoBehaviour
         nbOriginalTrackedObjects = trackedObjects.Count;
 
         recording = false;
+        keepRecordingOnNewScene = XREcho.GetInstance().dontDestroyOnLoad;
         recordingOnSceneUnloaded = false;
 
         trajectoryManager = TrajectoryManager.GetInstance();
-        canvasManager = CanvasManager.GetInstance();
         config = ExpeRecorderConfig.GetInstance();
 
         NewScene(SceneManager.GetActiveScene().name);
 
-        if (config.autoXp) autoStartRecording = true;
+        if (XREcho.GetInstance().autoExecution == XREcho.AutoMode.AutoStartRecord) StartRecording();
+    }
 
-        if (autoStartRecording) StartRecording();
-
+    private void OnGUI()
+    {
+        if (Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == recordShortcut)
+        {
+            ToggleRecording(recordKeyCooldown);
+        }
+        if (!XREcho.GetInstance().displayGUI && recording)
+        {
+            GUILayout.BeginArea(new Rect(10, 5, 200, 100));
+            recAlpha = (recAlpha + 0.01f) % 2.0f;
+            float curAlpha = recAlpha > 1.0f ? 2.0f - recAlpha : recAlpha;
+            GUI.color = new Color(0.9f, 0.0f, 0.0f, curAlpha);
+            string lab = "<size=30>[Rec.]</size>";
+            GUILayout.Label(lab);
+            GUI.color = Color.white;
+            GUILayout.EndArea();
+        }
     }
 
     public void NewSession()
@@ -158,6 +168,11 @@ public class RecordingManager : MonoBehaviour
             recordingOnSceneUnloaded = true;
             StopRecording();
         }
+    }
+
+    public static int GetInstances()
+    {
+        return 1;
     }
 
     public static RecordingManager GetInstance()
@@ -239,7 +254,7 @@ public class RecordingManager : MonoBehaviour
             to.trackPosition = true;
             to.trackRotation = true;
             to.trackCamera = false;
-            to.trackingRate = interactableTrackingRate;
+            to.trackingRate = interactablesTrackingRateHz;
         }
     }
 
@@ -250,7 +265,7 @@ public class RecordingManager : MonoBehaviour
             trackedObjects.RemoveRange(nbOriginalTrackedObjects, trackedObjects.Count - nbOriginalTrackedObjects);
         }
 
-        if (trackXRInteractable)
+        if (trackXRInteractables)
             TrackInteractableGameObjects();
         ComputeTrackingIntervals();
     }
@@ -275,12 +290,12 @@ public class RecordingManager : MonoBehaviour
         Debug.Log("Started recording events data to " + filePath);
     }
 
-    public void ToggleRecording()
+    public void ToggleRecording(float minRecordTime = 0.0f)
     {
-        if (recording)
-            StopRecording();
-        else
+        if (!recording)
             StartRecording();
+        else if (timeSinceStartOfRecording >= minRecordTime)
+            StopRecording();
     }
 
     private void StartRecording()
@@ -298,8 +313,7 @@ public class RecordingManager : MonoBehaviour
 
         events = new List<string>();
         eventToId = new Dictionary<string, int>();
-
-        canvasManager.StartRecording();
+        
         trajectoryIndex = trajectoryManager.NewTrajectory();
         ResetTimers();
 
@@ -384,15 +398,14 @@ public class RecordingManager : MonoBehaviour
         objectsFormatWriter.Close();
         eventsFormatWriter.Close();
         WriteMetadata();
-
-        canvasManager.StopRecording();
+        
         Debug.Log("Recording Stopped and all data written to disk.");
     }
 
     private void ResetTimers()
     {
         timeSinceStartOfRecording = 0;
-        timeSinceLastControlPoint = controlPointsInterval;
+        timeSinceLastControlPoint = trajectoryManager.minTimeInterval;
 
         foreach (TrackedObject to in trackedObjects)
             to.timeSinceLastWrite = to.trackingInterval;
@@ -402,24 +415,15 @@ public class RecordingManager : MonoBehaviour
     {
         timeSinceStartOfRecording += Time.deltaTime;
 
-        //TODO : Convert to Action Based
-        //if (!recording && Input.GetKeyDown(recordKey))
-        //    StartRecording();
-        //else if (timeSinceStartOfRecording > recordKeyCooldown && Input.GetKeyDown(recordKey))
-        //    StopRecording();
-
         if (!recording)
             return;
-
-        canvasManager.SetCurrentTime(timeSinceStartOfRecording);
-
+        
         // Here we are recording
         UpdateTimers();
         WriteTrackedObjects();
-        canvasManager.SetCurrentSize(GetFilesSize());
     }
 
-    private int GetFilesSize()
+    public int GetFilesSize()
     {
         int size = 0;
 
@@ -454,11 +458,11 @@ public class RecordingManager : MonoBehaviour
                 }
             }
 
-            if (showControlPoints && i == 0)
+            if (showControlPointsWhileRecording && i == 0)
             {
-                if (timeSinceLastControlPoint >= controlPointsInterval)
+                if (timeSinceLastControlPoint >= trajectoryManager.minTimeInterval)
                 {
-                    if (Vector3.Distance(to.obj.transform.position, lastControlPoint) > controlPointsDistance)
+                    if (Vector3.Distance(to.obj.transform.position, lastControlPoint) > trajectoryManager.minDistanceInterval)
                         NewControlPoint(to.obj.transform.position);
                 }
             }

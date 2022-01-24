@@ -30,7 +30,7 @@ public class ExpeRecorderConfig : MonoBehaviour
 
     // Filepaths related variables
     [Header("Paths and Names")]
-    public string expeRecorderPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "ExpeRecorder");
+    public string expeRecorderPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "XREcho");
     public string GetExpeRecorderPath() { return expeRecorderPath; }
     private string recordingsFolder;
     public string GetRecordingsFolder() { return recordingsFolder; }
@@ -40,13 +40,12 @@ public class ExpeRecorderConfig : MonoBehaviour
 
     public string session = "defaultSession";
     private string sessionFolder;
-
-    public bool autoXp = false;
-
     public string GetSessionFolder() { return sessionFolder; }
 
+    [Space(8)]
+    public bool AutoLoadLastVisitorSession = false;
+    public string visitorFilePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "XREcho", "visitors_metadata.csv");
     private string configFile;
-    private string visitorFilePath = "./visitors/visitors_metadata.csv";
 
     [Header("Separators and formats")]
     public char filenameFieldsSeparator = '_';
@@ -76,7 +75,7 @@ public class ExpeRecorderConfig : MonoBehaviour
         recordingManager = RecordingManager.GetInstance();
         replayManager = ReplayManager.GetInstance();
 
-        if(autoXp) FetchVisitorId();
+        if(AutoLoadLastVisitorSession) FetchVisitorId();
 
         NewSession(session);
     }

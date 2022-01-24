@@ -3,6 +3,7 @@ using UnityEngine.Rendering;
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 public class Utils
 {
@@ -39,6 +40,28 @@ public class Utils
         }
 
         return true;
+    }
+
+    public static List<string> GetSubfolders(string folder)
+    {
+        DirectoryInfo dir;
+        DirectoryInfo[] subs;
+        List<string> toreturn = new List<string>();
+        try
+        {
+            dir = new DirectoryInfo(folder);
+            subs = dir.GetDirectories();
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            subs = new DirectoryInfo[] { };
+            Debug.Log("" + ex);
+        }
+
+        foreach (DirectoryInfo s in subs)
+            toreturn.Add(s.Name);
+
+        return toreturn;
     }
 
 
@@ -111,6 +134,55 @@ public class Utils
             }
 
         return gaussian;
+    }
+
+    public static void TakeScreenshot(Camera camera, string path = "Screenshots", string filename = "screenshot", int width = 1024, int height = 512)
+    {
+        RenderTexture tempRT = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+        RenderTexture.active = tempRT;
+
+        camera.targetTexture = tempRT;
+        camera.Render();
+
+        Texture2D image = new Texture2D(width, height, TextureFormat.ARGB32, false, true);
+        image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        image.Apply();
+
+        RenderTexture.active = null;
+
+        byte[] bytes = image.EncodeToPNG();
+        UnityEngine.Object.Destroy(image);
+
+        camera.targetTexture = null;
+
+        File.WriteAllBytes(path + '/' + filename + ".png", bytes);
+    }
+
+    public static string TimeString(int timeSec)
+    {
+        string toreturn = "";
+        int cropTime = timeSec;
+        if (timeSec >= 3600)
+        {
+            toreturn = "" + timeSec / 3600 + ":";
+            cropTime = timeSec % 3600;
+            if (cropTime < 600)
+            {
+                toreturn += "0";
+            }
+        }
+        toreturn += "" + cropTime / 60 + ":";
+        if (cropTime >= 60)
+        {
+            cropTime = timeSec % 60;
+        }
+        if (cropTime < 10)
+        {
+            toreturn += "0";
+        }
+        toreturn += cropTime;
+
+        return toreturn;
     }
 
 }
