@@ -1,14 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor;
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
+using UnityEngine.XR.Interaction.Toolkit;
+
 /// <summary>
 /// The <c>ReplayManager</c> class contains all methods to replay the data logged by the RecordingManager.
 /// </summary>
+[ExecuteInEditMode]
 public class ReplayManager : MonoBehaviour
 {
     static ReplayManager instance;
@@ -50,10 +54,18 @@ public class ReplayManager : MonoBehaviour
     private GameObject cloneObject;
     private List<GameObject> cloneByRecordingObjects;
 
-    public bool cloneEverything = true;
+    public bool cloneEverything = false;
     public float clonesTransparency = 0.5f;
+
+    [Header("Default Replay Models")]
+    public GameObject cameraModel;
+    public GameObject controllerModel;
+    public GameObject rightControllerModel;
+    public GameObject eyeModel;
+
     [Space(8)]
-    public KeyCode replayShortcut = KeyCode.P;
+    public KeyCode playPauseShortcut = KeyCode.P;
+    public KeyCode stopShortcut = KeyCode.S;
     private float recAlpha = 1.0f;
     
     private bool keepReplayingOnNewScene;
@@ -88,9 +100,11 @@ public class ReplayManager : MonoBehaviour
         replayCamera = null;
         shouldChangeCamera = false;
 
-        OnValidate();
+        SetClonesTransparency();
 
         XREcho xrecho = XREcho.GetInstance();
+        if (xrecho == null) return;
+
         keepReplayingOnNewScene = xrecho.dontDestroyOnLoad;
 
         if (xrecho.autoExecution == XREcho.AutoMode.AutoStartReplay && !xrecho.displayGUI)
@@ -103,36 +117,37 @@ public class ReplayManager : MonoBehaviour
 
     private void OnGUI()
     {
-        bool noGui = !XREcho.GetInstance().displayGUI;
+        if (XREcho.GetInstance().displayGUI)
+            return;
+
         if (Event.current.isKey && Event.current.type == EventType.KeyDown)
         {
-            if (Event.current.keyCode == replayShortcut)
+            if (Event.current.keyCode == playPauseShortcut)
             {
-                if (noGui)
-                    ChangeCamera();
                 if (replaying)
                 {
-                    StopReplaying();
+                    TogglePause();
                 }
                 else if (!recordingManager.IsRecording())
                 {
                     LoadAndReadLastRecord();
                     StartReplaying();
-                }
-            } else if (Event.current.keyCode == recordingManager.recordShortcut && replaying)
-            {
-                if (noGui)
                     ChangeCamera();
+                }
+            }
+            else if (replaying && (Event.current.keyCode == stopShortcut || Event.current.keyCode == recordingManager.recordShortcut))
+            {
+                ChangeCamera();
                 StopReplaying();
             }
         }
-        if (noGui && replaying)
+        if (replaying)
         {
             GUILayout.BeginArea(new Rect(10, 5, 200, 100));
             recAlpha = (recAlpha + 0.01f) % 2.0f;
             float curAlpha = recAlpha > 1.0f ? 2.0f - recAlpha : recAlpha;
-            GUI.color = new Color(0.0f, 0.8f, 0.0f, curAlpha);
-            string lab = "<size=30>[Play]</size>";
+            GUI.color = paused ? new Color(0.8f, 0.8f, 0.0f, 1.0f) : new Color(0.0f, 0.8f, 0.0f, curAlpha);
+            string lab = "<size=30>" + (paused ? "[Paused]" : "[Play]") + "</size>";
             GUILayout.Label(lab);
             GUI.color = Color.white;
             GUILayout.EndArea();
@@ -194,11 +209,33 @@ public class ReplayManager : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     private void OnValidate()
     {
-        if (clones != null)
-            SetClonesTransparency();
+        SetClonesTransparency();
+
+        cameraModel = InitDefaultReplayModel(cameraModel, "DefaultCameraModel");
+        controllerModel = InitDefaultReplayModel(controllerModel, "DefaultControllerModel");
+        rightControllerModel = InitDefaultReplayModel(rightControllerModel, "DefaultRightControllerModel");
+        eyeModel = InitDefaultReplayModel(eyeModel, "DefaultEyeModel");
     }
+
+    private GameObject InitDefaultReplayModel(GameObject model, string defaultName)
+    {
+        if (model != null)
+            return model;
+
+        for (int i=0; i<transform.childCount; i++)
+        {
+            if (transform.GetChild(i).gameObject.name == "XREcho" + defaultName)
+                return null;
+        }
+        GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/XREcho/Prefabs/DefaultReplayModels/" + defaultName + ".prefab", typeof(GameObject));
+        GameObject defaultObject = (GameObject)Instantiate(prefab, transform);
+        defaultObject.name = "XREcho" + defaultName;
+        return defaultObject;
+    }
+#endif
 
     public static ReplayManager GetInstance()
     {
@@ -236,13 +273,15 @@ public class ReplayManager : MonoBehaviour
         return objectsDataFiles;
     }
 
-    private string GetCorrespondingFile(string originalFile, string type)
+    private string GetCorrespondingFile(string originalFile, string type, string folderName = "")
     {
+        string folder = folderName != "" ? folderName : config.GetSessionFolder();
+
         string timestamp = originalFile.Split(config.filenameFieldsSeparator)[0];
         string otherFilename = timestamp + config.filenameFieldsSeparator + type + config.GetFileSuffix() + ".csv";
 
         string correspondingFile = "";
-        if (File.Exists(Path.Combine(config.GetSessionFolder(), otherFilename)))
+        if (File.Exists(Path.Combine(folderName, otherFilename)))
             correspondingFile = otherFilename;
 
         return correspondingFile;
@@ -309,22 +348,26 @@ public class ReplayManager : MonoBehaviour
                 if (to.replayGameObject == null && !cloneEverything && to.obj != null)
                 {
                     clone = AddClone(to.obj, false, false); // not really cloned here
+                    DisableCloneComponents(clone, true);
+                }
+                else if (to.replayGameObject != null)
+                {
+                    clone = AddClone(to.replayGameObject);
+                    DisableCloneComponents(clone, false);
+                }
+                else if (to.obj != null)
+                {
+                    clone = AddClone(to.obj);
+                    DisableCloneComponents(clone, true);
                 }
                 else
                 {
-                    if (to.replayGameObject != null)
-                        clone = AddClone(to.replayGameObject);
-                    else if (to.obj != null)
-                        clone = AddClone(to.obj);
-                    else
-                    {
-                        /* Obsolete?
-                        Debug.Log("No game object given and original not found, creating empty GameObject for: " + to.objPath);
-                        string[] objPathSplit = to.objPath.Split('/');
-                        string objName = objPathSplit[objPathSplit.Length - 1];
-                        clone = AddClone(new GameObject(objName), false, true);
-                        */
-                    }
+                    /* Obsolete?
+                    Debug.Log("No game object given and original not found, creating empty GameObject for: " + to.objPath);
+                    string[] objPathSplit = to.objPath.Split('/');
+                    string objName = objPathSplit[objPathSplit.Length - 1];
+                    clone = AddClone(new GameObject(objName), false, true);
+                    */
                 }
 
                 if (to.trackPosition || to.trackRotation)
@@ -353,10 +396,34 @@ public class ReplayManager : MonoBehaviour
 
     private void SetClonesTransparency()
     {
+        if (clones == null)
+            return;
+
         for (int i = 0; i < nbRecordings; i++)
             foreach (GameObject clone in clones[i])
                 foreach (MeshTransparencyHandler transparencyHandler in clone.GetComponentsInChildren<MeshTransparencyHandler>())
                     transparencyHandler.SetTransparencyAlpha(clonesTransparency);
+    }
+    
+    private void DisableCloneComponents(GameObject clone, bool disableScripts)
+    {
+        if (disableScripts)
+            foreach (MonoBehaviour monoBehaviour in clone.GetComponentsInChildren<MonoBehaviour>())
+                if (monoBehaviour != null)
+                    monoBehaviour.enabled = false;
+
+        foreach (Collider collider in clone.GetComponentsInChildren<Collider>())
+            if (collider != null)
+                collider.enabled = false;
+
+        foreach (Rigidbody rigidbody in clone.GetComponentsInChildren<Rigidbody>())
+        {
+            if (rigidbody != null)
+            {
+                rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                rigidbody.isKinematic = true;
+            }
+        }
     }
 
     private void DisableClonesComponents()
@@ -365,22 +432,7 @@ public class ReplayManager : MonoBehaviour
         {
             foreach (GameObject clone in clones[i])
             {
-                foreach (MonoBehaviour monoBehaviour in clone.GetComponentsInChildren<MonoBehaviour>())
-                    if(monoBehaviour != null)
-                        monoBehaviour.enabled = false;
-
-                foreach (Collider collider in clone.GetComponentsInChildren<Collider>())
-                    if(collider != null)    
-                        collider.enabled = false;
-
-                foreach (Rigidbody rigidbody in clone.GetComponentsInChildren<Rigidbody>())
-                {
-                    if(rigidbody != null)
-                    {
-                        rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-                        rigidbody.isKinematic = true;
-                    }
-                }
+                DisableCloneComponents(clone, true);
             }
         }
     }
@@ -456,17 +508,18 @@ public class ReplayManager : MonoBehaviour
             Debug.LogError("Error: no record file number " + recordingId + " found, aborting reading");
             return;
         }
-        ReadObjectsDataFiles(new List<string> { objectsDataFiles[recordingId] });
+        ReadObjectsDataFiles(new List<string> { objectsDataFiles[recordingId] }, folderName);
     }
 
-    // out of readRecording (to be done asynchrously) : should be called before !
-    public void ReadObjectsDataFiles(List<string> objectsDataFiles)
+    // out of readRecording (to be done asynchrously) : should be called before readRecording !
+    public void ReadObjectsDataFiles(List<string> objectsDataFiles, string folderName="")
     {
         objectsData = new List<List<Dictionary<string, object>>>();
 
+        string folder = folderName != "" ? folderName : config.GetSessionFolder();
         foreach (string objectsDataFile in objectsDataFiles)
         {
-            List<Dictionary<string, object>> data = CSVReader.ReadCSV(Path.Combine(config.GetSessionFolder(), objectsDataFile));
+            List<Dictionary<string, object>> data = CSVReader.ReadCSV(Path.Combine(folder, objectsDataFile));
             objectsData.Add(data);
         }
     }
@@ -479,7 +532,7 @@ public class ReplayManager : MonoBehaviour
             Debug.LogError("Error: no record file number " + recordingId + " found, aborting reading");
             return;
         }
-        ReadRecordings(new List<string> { objectsDataFiles[recordingId] });
+        ReadRecordings(new List<string> { objectsDataFiles[recordingId] }, folderName);
     }
 
     public void ReadRecordings()
@@ -490,9 +543,10 @@ public class ReplayManager : MonoBehaviour
     /*
     * Reads all the recordings matching the project name and the session name used and prepares for replaying
     */
-    public void ReadRecordings(List<string> objectsDataFiles)
+    public void ReadRecordings(List<string> objectsDataFiles, string folderName="")
     {
         Reset();
+        string folder = folderName != "" ? folderName : config.GetSessionFolder();
         //List<string> objectsDataFiles = GetObjectsDataFiles();
         List<TrackedObject> trackedObjectsList;
         List<TrackedData> trackedDataList;
@@ -502,7 +556,7 @@ public class ReplayManager : MonoBehaviour
              * Loading Objects Format File
              */
             Debug.Log("Reading " + objectsDataFile);
-            string objectsFormatFile = GetCorrespondingFile(objectsDataFile, "objectsFormat");
+            string objectsFormatFile = GetCorrespondingFile(objectsDataFile, "objectsFormat", folder);
 
             if (objectsFormatFile.Equals(""))
             {
@@ -511,19 +565,19 @@ public class ReplayManager : MonoBehaviour
             }
 
             nbRecordings++;
-            LoadObjectsFormat(Path.Combine(config.GetSessionFolder(), objectsFormatFile), out trackedObjectsList, out trackedDataList);
+            LoadObjectsFormat(Path.Combine(folder, objectsFormatFile), out trackedObjectsList, out trackedDataList);
             trackedObjects.Add(trackedObjectsList);
 
             List<TrackingAction> actionList = RecordingManager.ComputeActions(trackedObjectsList, false);
             actions.Add(actionList);
 
-            LoadObjectsData(Path.Combine(config.GetSessionFolder(), objectsDataFile), nbRecordings-1);
+            LoadObjectsData(Path.Combine(folder, objectsDataFile), nbRecordings-1);
 
             /*
              * Loading Events Format And Data Files
              */
-            string eventsFormatFile = GetCorrespondingFile(objectsDataFile, "eventsFormat");
-            string eventsDataFile = GetCorrespondingFile(objectsDataFile, "eventsData");
+            string eventsFormatFile = GetCorrespondingFile(objectsDataFile, "eventsFormat", folder);
+            string eventsDataFile = GetCorrespondingFile(objectsDataFile, "eventsData", folder);
 
             if (eventsFormatFile.Equals("") || eventsFormatFile.Equals(""))
             {
@@ -532,14 +586,14 @@ public class ReplayManager : MonoBehaviour
                 eventsData.Add(null);
             } else
             {
-                LoadEventsFormat(Path.Combine(config.GetSessionFolder(), eventsFormatFile));
-                LoadEventsData(Path.Combine(config.GetSessionFolder(), eventsDataFile));
+                LoadEventsFormat(Path.Combine(folder, eventsFormatFile));
+                LoadEventsData(Path.Combine(folder, eventsDataFile));
             }
         }
 
         InstantiateClones();
-        DisableClonesComponents();
-        AddReplayScripts();
+        //DisableClonesComponents();
+        //AddReplayScripts();
         //MakeClonesTransparent();
         HideClones();
     }
@@ -551,7 +605,7 @@ public class ReplayManager : MonoBehaviour
         List<Dictionary<string, object>> format = CSVReader.ReadCSV(filepath);
 
         ObjPathCache objPathCache = new ObjPathCache();
-        GameObjectsManager gameObjectsManager = GameObjectsManager.GetInstance();
+        //GameObjectsManager gameObjectsManager = GameObjectsManager.GetInstance();
 
         foreach (Dictionary<string, object> entry in format)
         {
@@ -570,20 +624,41 @@ public class ReplayManager : MonoBehaviour
 
                 if (entry.ContainsKey("replayScripts"))
                     to.replayScripts = ((string)entry["replayScripts"]).Split(config.replayScriptsSeparator);
-
+                
                 if (entry.ContainsKey("replayGameObject"))
                 {
                     string objPath = (string)entry["replayGameObject"];
                     GameObject replayGameObject = GameObject.Find(objPath);
 
-                    if (replayGameObject == null && gameObjectsManager != null)
-                    {
-                        string[] pathParts = objPath.Split('/');
-                        string gameObjectName = pathParts[pathParts.Length - 1];
-                        replayGameObject = gameObjectsManager.GetGameObject(gameObjectName);
-                    }
+                    //if (replayGameObject == null && gameObjectsManager != null)
+                    //{
+                    //    string[] pathParts = objPath.Split('/');
+                    //    string gameObjectName = pathParts[pathParts.Length - 1];
+                    //    replayGameObject = gameObjectsManager.GetGameObject(gameObjectName);
+                    //}
 
                     to.replayGameObject = replayGameObject;
+                }
+                if (to.objPath == "EyeTracking")
+                {
+                    to.obj = eyeModel;
+                    to.replayGameObject = eyeModel;
+                }
+                else if (to.obj != null && (to.replayGameObject == null || to.replayGameObject == to.obj))
+                {
+                    if (to.obj.tag == "MainCamera")
+                    {
+                        to.replayGameObject = cameraModel;
+                    } else if (to.obj.GetComponent<XRBaseController>() != null)
+                    {
+                        if (to.obj.name.Contains("Right"))
+                        {
+                            to.replayGameObject = rightControllerModel;
+                        } else
+                        {
+                            to.replayGameObject = controllerModel;
+                        }
+                    }
                 }
             } else if (type.Equals("data"))
             {

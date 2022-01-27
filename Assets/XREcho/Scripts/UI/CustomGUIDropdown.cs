@@ -117,8 +117,8 @@ public class CustomGUIDropdown
                 DropdownIsDisplayed = false;
             }
         }
-        GUILayout.EndScrollView();
         GUILayout.EndVertical();
+        GUILayout.EndScrollView();
         GUILayout.EndArea();
     }
 

@@ -10,7 +10,7 @@ public class TrajectoryManager : MonoBehaviour
 {
     private static TrajectoryManager instance;
 
-    public float minDistanceInterval = 0.3f;
+    public float minDistanceInterval = 0.2f;
     public float minTimeInterval = 0.1f;
 
     [Header("Trajectories Display")]

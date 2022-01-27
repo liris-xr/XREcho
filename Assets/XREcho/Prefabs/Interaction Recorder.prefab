@@ -175,6 +175,7 @@ Transform:
   - {fileID: 1550837251833758282}
   - {fileID: 6610740940598636815}
   - {fileID: 5220485295246633589}
+  - {fileID: 5392915345807565741}
   m_Father: {fileID: 9086152001530863868}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -383,7 +384,6 @@ Transform:
   m_Children:
   - {fileID: 3947005033078236410}
   - {fileID: 6161490646137317571}
-  - {fileID: 5392915345807565741}
   - {fileID: 5623433059696991030}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -400,8 +400,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 726fa57a637b0114db24776818af36a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dontDestroyOnLoad: 0
+  autoExecution: 0
+  displayGUI: 1
   monitoringCamera: {fileID: 4567811117169655115}
+  dontDestroyOnLoad: 0
   trajectoryHeatmapResolution: 1
 --- !u!114 &825138434
 MonoBehaviour:
@@ -419,54 +421,12 @@ MonoBehaviour:
   expeRecorderPath: ./InteractionRecorderData
   project: project
   session: session
-  autoXp: 0
+  AutoLoadLastVisitorSession: 0
+  visitorFilePath: C:\Users\louis\Documents\XREcho\visitors_metadata.csv
   filenameFieldsSeparator: 95
   replayScriptsSeparator: 124
   sceneLoadEventSeparator: 58
   dateFormat: yy-MM-dd-HH-mm-ss
---- !u!1 &5220485294864544237
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5220485294864544227}
-  - component: {fileID: 5220485294864544236}
-  m_Layer: 0
-  m_Name: ConsoleToGUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5220485294864544227
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5220485294864544237}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 5392915345807565741}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5220485294864544236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5220485294864544237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f9f107bfde96a4895580eb52cd83e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6380820805052875203
 GameObject:
   m_ObjectHideFlags: 0
@@ -573,8 +533,9 @@ GameObject:
   - component: {fileID: 5392915345807565741}
   - component: {fileID: 5009566547282367709}
   - component: {fileID: 2701785464356119210}
+  - component: {fileID: 5909108498336920834}
   m_Layer: 0
-  m_Name: GUI
+  m_Name: GUI Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -590,10 +551,9 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 5220485294864544227}
-  m_Father: {fileID: 9086152001530863868}
-  m_RootOrder: 2
+  m_Children: []
+  m_Father: {fileID: 6161490646137317571}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5009566547282367709
 MonoBehaviour:
@@ -1501,6 +1461,73 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
+  missingLabelStyle:
+    m_Name: 
+    m_Normal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Hover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Active:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Focused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnNormal:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnHover:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnActive:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_OnFocused:
+      m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
+      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
+    m_Border:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Margin:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Padding:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Overflow:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+    m_Font: {fileID: 0}
+    m_FontSize: 0
+    m_FontStyle: 0
+    m_Alignment: 0
+    m_WordWrap: 0
+    m_RichText: 1
+    m_TextClipping: 0
+    m_ImagePosition: 0
+    m_ContentOffset: {x: 0, y: 0}
+    m_FixedWidth: 0
+    m_FixedHeight: 0
+    m_StretchWidth: 1
+    m_StretchHeight: 0
   noHoverStyle:
     m_Name: 
     m_Normal:
@@ -1635,6 +1662,30 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
+--- !u!114 &5909108498336920834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489432349529979477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f9f107bfde96a4895580eb52cd83e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  displayOnScreen: 1
+  printToFile: 1
+  logFolder: C:\Users\louis\Documents\Logs
+  showLogs: 1
+  showWarnings: 1
+  showErrors: 1
+  guiRect:
+    serializedVersion: 2
+    x: 20
+    y: 175
+    width: 270
+    height: 300
 --- !u!1 &6636519038568656952
 GameObject:
   m_ObjectHideFlags: 0
@@ -1667,7 +1718,7 @@ Transform:
   - {fileID: 7846753453277194569}
   - {fileID: 4019697444498718395}
   m_Father: {fileID: 9086152001530863868}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7115900510589803761
 GameObject:
@@ -1680,6 +1731,7 @@ GameObject:
   - component: {fileID: 3947005033078236410}
   - component: {fileID: 4567811117169655115}
   - component: {fileID: 6933813768542225123}
+  - component: {fileID: 6726054524049216853}
   m_Layer: 5
   m_Name: MonitoringCamera
   m_TagString: Untagged
@@ -1776,6 +1828,19 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
+--- !u!114 &6726054524049216853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7115900510589803761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0478d808396f594c8c5764db131a5a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zoomFactor: 0.1
 --- !u!1001 &540624751113746846
 PrefabInstance:
   m_ObjectHideFlags: 0

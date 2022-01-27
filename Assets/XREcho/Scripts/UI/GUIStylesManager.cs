@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class GUIStylesManager : MonoBehaviour
 {
@@ -66,6 +67,30 @@ public class GUIStylesManager : MonoBehaviour
             needGUIInit = false;
         }
     }
+
+#if UNITY_EDITOR
+    private Sprite autoInitSprite(Sprite sprite, string name)
+    {
+        if (sprite == null)
+        {
+            return (Sprite)AssetDatabase.LoadAssetAtPath("Assets/XREcho/UI/" + name + ".png", typeof(Sprite));
+        }
+        return sprite;
+    }
+
+    private void OnValidate() 
+    {
+        recSprite = autoInitSprite(recSprite, "rec_button");
+        playSprite = autoInitSprite(playSprite, "play_button");
+        pauseSprite = autoInitSprite(pauseSprite, "pause_button");
+        forwardSprite = autoInitSprite(forwardSprite, "fastforward_button");
+        cameraSprite = autoInitSprite(cameraSprite, "camera_button");
+        topviewSprite = autoInitSprite(topviewSprite, "topview_button");
+        stopSprite = autoInitSprite(stopSprite, "stop_button");
+        screenshotSprite = autoInitSprite(screenshotSprite, "screenshot_button");
+        loadingSprite = autoInitSprite(loadingSprite, "loading_icon");
+    }
+#endif
 
     public string LabeledTextField(string title, string thumbnail)
     {

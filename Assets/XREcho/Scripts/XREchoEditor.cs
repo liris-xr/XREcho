@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(XREcho))]
 [CanEditMultipleObjects]
 public class XREchoEditor : Editor
@@ -74,7 +75,23 @@ public class XREchoEditor : Editor
         EditorGUILayout.PropertyField(monitoringCamera);
         if (monitoringCamera.objectReferenceValue == null && replayIsPossible)
         {
-            EditorGUILayout.HelpBox("Without a monitoring camera, replays monitoring and screenshots will be irrelevant (an orthographic top view is advised).", MessageType.Warning);
+            if (GUILayout.Button("Add a Monitoring Camera"))
+            {
+                GameObject master = ((MonoBehaviour)target).gameObject;
+                GameObject instance = new GameObject("MonitoringCamera", typeof(Camera));
+                instance.transform.parent = master.transform;
+                instance.transform.position = new Vector3(0, 5, 0);
+                instance.transform.rotation = Quaternion.Euler(90, 0, 0);
+                instance.AddComponent(typeof(OrthoCameraManipulator));
+                Camera cam = (Camera)instance.GetComponent(typeof(Camera));
+                cam.orthographic = true;
+                cam.orthographicSize = 5;
+                cam.targetDisplay = 2;
+                cam.stereoTargetEye = StereoTargetEyeMask.None;
+                monitoringCamera.objectReferenceValue = instance;
+            }
+            EditorGUILayout.HelpBox("Without a monitoring camera, replays monitoring and screenshots will be irrelevant (an orthographic top view is advised). Click on the button above to automatically add one.", MessageType.Warning);
+            EditorGUILayout.Space();
         }
 
         EditorGUILayout.PropertyField(dontDestroyOnLoad);
@@ -88,15 +105,17 @@ public class XREchoEditor : Editor
         bool allOK = true;
         allOK &= CheckNeededSingleton(typeof(RecordingManager));
         allOK &= CheckNeededSingleton(typeof(TrajectoryManager));
-        if (CheckNeededSingleton(typeof(ReplayManager), "All replay and analyze features will be disabled", false))
-        {
-            replayIsPossible = CheckNeededSingleton(typeof(GameObjectsManager), "Replay features cannot work");
-        } else
-        {
-            replayIsPossible = false;
-        }
+        allOK &= CheckNeededSingleton(typeof(MaterialManager));
+        replayIsPossible = CheckNeededSingleton(typeof(ReplayManager), "All replay and analyze features will be disabled", false);
+        //if (CheckNeededSingleton(typeof(ReplayManager), "All replay and analyze features will be disabled", false))
+        //{
+        //    replayIsPossible = CheckNeededSingleton(typeof(GameObjectsManager), "Replay features cannot work");
+        //} else
+        //{
+        //    replayIsPossible = false;
+        //}
         allOK &= replayIsPossible;
-        bool newGuiIsPossible = CheckNeededSingleton(typeof(ExpeGUI), "The runtime GUI will not be available", false);
+        bool newGuiIsPossible = CheckNeededSingleton(typeof(GUIManager), "The runtime GUI will not be available", false);
         if (newGuiIsPossible && !guiIsPossible)
         {
             displayGUI.boolValue = true;
@@ -146,3 +165,5 @@ public class XREchoEditor : Editor
         return clicked;
     }
 }
+
+#endif

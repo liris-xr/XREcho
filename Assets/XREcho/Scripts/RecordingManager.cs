@@ -67,6 +67,8 @@ public class RecordingManager : MonoBehaviour
     public float GetTimeSinceStartOfRecording() { return timeSinceStartOfRecording; }
     private float timeSinceLastControlPoint;
     private int nbOriginalTrackedObjects;
+    private bool keepRecordingOnNewScene = true;
+    private bool recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
 
     private CSVWriter metadataWriter;
     private CSVWriter objectsWriter;
@@ -75,18 +77,21 @@ public class RecordingManager : MonoBehaviour
     private CSVWriter eventsFormatWriter;
 
     private List<RecordingMetadata> metadata;
-    public List<TrackedObject> trackedObjects = new List<TrackedObject>();
     private List<TrackingAction> actions;
 
     private Dictionary<string, int> eventToId;
     private List<string> events;
-    
-    private bool keepRecordingOnNewScene = true;
-    private bool recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
+
+
+    public bool trackXRControllers = true;
     public bool trackXRInteractables = true;
-    public float interactablesTrackingRateHz = 100;
+    public LayerMask trackedLayers;
+    public bool recordEyeTracking = false;
+    public float trackingRateHz = 100;
     [Space(8)]
-    public KeyCode recordShortcut = KeyCode.S;
+    public List<TrackedObject> trackedObjects = new List<TrackedObject>();
+    [Space(8)]
+    public KeyCode recordShortcut = KeyCode.R;
     private float recordKeyCooldown = 0.4f;
     private float recAlpha = 1.0f;
 
@@ -128,11 +133,14 @@ public class RecordingManager : MonoBehaviour
 
     private void OnGUI()
     {
+        if (XREcho.GetInstance().displayGUI)
+            return;
+
         if (Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == recordShortcut)
         {
             ToggleRecording(recordKeyCooldown);
         }
-        if (!XREcho.GetInstance().displayGUI && recording)
+        if (recording)
         {
             GUILayout.BeginArea(new Rect(10, 5, 200, 100));
             recAlpha = (recAlpha + 0.01f) % 2.0f;
@@ -187,6 +195,7 @@ public class RecordingManager : MonoBehaviour
             if (to.obj != null)
                 to.objPath = Utils.GetGameObjectPath(to.obj);
         }
+        ComputeAllTrackedObjects();
     }
 
     public List<TrackedObject> GetTrackedObjects()
@@ -240,22 +249,100 @@ public class RecordingManager : MonoBehaviour
         return actions;
     }
 
+    private TrackedObject GetTrackedObject(string objPath)
+    {
+        foreach (TrackedObject to in trackedObjects)
+            if (to.objPath == objPath) return to;
+        return null;
+    }
+
+    private void RemoveTrackedObject(GameObject gameObject)
+    {
+        string objpath = Utils.GetGameObjectPath(gameObject);
+        trackedObjects.Remove(GetTrackedObject(objpath));
+    }
+
+    private void AddTrackedObject(GameObject gameObject)
+    {
+        if (gameObject == null) return;
+        string objpath = Utils.GetGameObjectPath(gameObject);
+        if (GetTrackedObject(objpath) != null) return;
+
+        TrackedObject to = new TrackedObject();
+        trackedObjects.Add(to);
+
+        if (gameObject.activeInHierarchy)
+            to.obj = gameObject;
+        to.objPath = objpath;
+        to.trackPosition = true;
+        to.trackRotation = true;
+        to.trackCamera = gameObject.tag == "MainCamera";
+        to.trackingRate = trackingRateHz;
+    }
+
+    private void TrackControllerGameObjects()
+    {
+        foreach (XRBaseController controller in GameObject.FindObjectsOfType<XRBaseController>(true))
+        {
+            if (trackXRControllers)
+                AddTrackedObject(controller.gameObject);
+            else
+                RemoveTrackedObject(controller.gameObject);
+        }
+    }
+
     private void TrackInteractableGameObjects()
     {
-        //DONE : Convert from SteamVR Interactable to XRInteractable
         foreach (XRBaseInteractable interactable in GameObject.FindObjectsOfType<XRBaseInteractable>(true))
         {
-            TrackedObject to = new TrackedObject();
-            trackedObjects.Add(to);
-
-            if (interactable.gameObject.activeInHierarchy)
-                to.obj = interactable.gameObject;
-            to.objPath = Utils.GetGameObjectPath(interactable.gameObject);
-            to.trackPosition = true;
-            to.trackRotation = true;
-            to.trackCamera = false;
-            to.trackingRate = interactablesTrackingRateHz;
+            if (trackXRInteractables)
+                AddTrackedObject(interactable.gameObject);
+            else
+                RemoveTrackedObject(interactable.gameObject);
         }
+    }
+
+    private bool CanRelease(GameObject go)
+    {
+        if (go.tag == "MainCamera") return false;
+        if (trackXRControllers && go.GetComponent<XRBaseController>() != null) return false;
+        if (trackXRInteractables && go.GetComponent<XRBaseInteractable>() != null) return false;
+        return true;
+    }
+
+    private void TrackGameObjectsInTrackedLayers()
+    {
+        GameObject[] gos = FindObjectsOfType(typeof(GameObject)) as GameObject[];
+        foreach (GameObject go in gos)
+        {
+            if ((LayerMask.GetMask(LayerMask.LayerToName(go.layer)) & trackedLayers) != 0)
+            {
+                AddTrackedObject(go);
+            } else if (CanRelease(go))
+            {
+                RemoveTrackedObject(go);
+            }
+        }
+    }
+
+    public void ComputeAllTrackedObjects()
+    {
+        if (Camera.main != null)
+            AddTrackedObject(Camera.main.gameObject);
+        if (recordEyeTracking)
+        {
+            TrackedObject to = new TrackedObject();
+            to.objPath = "EyeTracking";
+            to.trackingRate = trackingRateHz;
+            trackedObjects.Add(to);
+        } else
+        {
+            trackedObjects.Remove(GetTrackedObject("EyeTracking"));
+        }
+        TrackControllerGameObjects();
+        TrackInteractableGameObjects();
+        TrackGameObjectsInTrackedLayers();
+        ComputeTrackingIntervals();
     }
 
     public void NewScene(string newSceneName)
@@ -265,9 +352,7 @@ public class RecordingManager : MonoBehaviour
             trackedObjects.RemoveRange(nbOriginalTrackedObjects, trackedObjects.Count - nbOriginalTrackedObjects);
         }
 
-        if (trackXRInteractables)
-            TrackInteractableGameObjects();
-        ComputeTrackingIntervals();
+        ComputeAllTrackedObjects();
     }
 
     private void ComputeTrackingIntervals()

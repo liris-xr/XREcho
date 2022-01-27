@@ -19,6 +19,7 @@ public class TrackedObject : System.IEquatable<TrackedObject>
     [HideInInspector]
     public Vector3 lastRotation;
     public GameObject replayGameObject;
+    [HideInInspector]
     public string[] replayScripts;
 
     public bool Equals(TrackedObject other)

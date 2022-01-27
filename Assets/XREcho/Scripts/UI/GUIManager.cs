@@ -9,7 +9,8 @@ using System.Threading;
 //using ViveSR.anipal.Eye;
 
 [RequireComponent(typeof(GUIStylesManager))]
-public class ExpeGUI : MonoBehaviour
+[RequireComponent(typeof(LogToGUI))]
+public class GUIManager : MonoBehaviour
 {
     private enum GUITab
     {
@@ -26,6 +27,7 @@ public class ExpeGUI : MonoBehaviour
     private XREcho xrEcho;
     private ExpeRecorderConfig config;
     private GUIStylesManager stylesManager;
+    private LogToGUI logger;
     private RecordingManager recordingManager;
     private ReplayManager replayManager;
     private TrajectoryManager trajectoryManager;
@@ -73,7 +75,6 @@ public class ExpeGUI : MonoBehaviour
     private TrajectoryHeatmap currentTrajectoryHeatmap;
     private TrajectoryHeatmap sceneTrajectoryHeatmap;
     
-
     private void Start()
     {
         xrEcho = XREcho.GetInstance();
@@ -118,6 +119,9 @@ public class ExpeGUI : MonoBehaviour
     private void OnValidate()
     {
         guiHeight = Screen.height - upOffset;
+        int y = 150;
+        logger = GetComponent<LogToGUI>();
+        logger.guiRect = new Rect(leftOffset, upOffset + y + 5, guiWidth, guiHeight - y - 10);
     }
 
     private void Update()
@@ -179,9 +183,28 @@ public class ExpeGUI : MonoBehaviour
         GUILayout.EndVertical();
 
         GUILayout.EndVertical();
-        
+
+        if (recording)
+        {
+            DisplayToolbarIcon(stylesManager.recSprite.texture, 0, true);
+        }
+        if (replaying)
+        {
+            DisplayToolbarIcon(!paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, 1, true);
+        }
+        if (loading)
+        {
+            DisplayLoadingIcon();
+        }
+
         if (GUILayout.Button("Quit Application", IsADropdownDisplayed() ? stylesManager.noHoverStyle : "button"))
             Application.Quit();
+        if (Event.current.type == EventType.Repaint)
+        {
+            Rect quitrect = GUILayoutUtility.GetLastRect();
+            float y = quitrect.y + quitrect.height;
+            logger.guiRect = new Rect(leftOffset, upOffset + y + 5, guiWidth, guiHeight - y - 10);
+        }
 
         if (replayManager == null)
         {
@@ -194,11 +217,6 @@ public class ExpeGUI : MonoBehaviour
             replayProjectDropdown.DropdownOnGUI();
             replaySessionDropdown.DropdownOnGUI();
             replayRecordDropdown.DropdownOnGUI();
-        }
-
-        if (loading)
-        {
-            DisplayLoadingIcon();
         }
 
         GUILayout.EndArea();
@@ -231,7 +249,10 @@ public class ExpeGUI : MonoBehaviour
         //    SRanipal_Eye_API.LaunchEyeCalibration(IntPtr.Zero);
         //}
     }
-
+    private bool ShortcutIsPressed(KeyCode shortcut)
+    {
+        return Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == shortcut;
+    }
 
     private void RecordGUI()
     {
@@ -272,11 +293,7 @@ public class ExpeGUI : MonoBehaviour
 
         GUILayout.BeginHorizontal();
         GUILayout.Space(guiWidth / 2 - stylesManager.bigImageButtonStyle.fixedWidth);
-        if (Event.current.isKey && Event.current.keyCode == recordingManager.recordShortcut)
-        {
-            needReplayListUpdate = true;
-        }
-        if (GUILayout.Button(!recording ? stylesManager.recSprite.texture : stylesManager.stopSprite.texture, stylesManager.bigImageButtonStyle))
+        if (GUILayout.Button(!recording ? stylesManager.recSprite.texture : stylesManager.stopSprite.texture, stylesManager.bigImageButtonStyle) || ShortcutIsPressed(recordingManager.recordShortcut))
         {
             if (!recording)
                 currentBlinkingAlpha = 1;
@@ -301,11 +318,6 @@ public class ExpeGUI : MonoBehaviour
         GUI.color = Color.white;
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-
-        if (recording)
-        {
-            DisplayToolbarIcon(stylesManager.recSprite.texture, 0, true);
-        }
     }
 
 
@@ -377,11 +389,6 @@ public class ExpeGUI : MonoBehaviour
             foreach (MonoBehaviour showViz in transform.root.GetComponentsInChildren<ShowGaze>(true))
                 showViz.enabled = displayGazeVisu;
         }
-
-        if (replaying)
-        {
-            DisplayToolbarIcon(!paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, 1, true);
-        }
     }
 
     private void ReaderGUI(float recordDuration)
@@ -404,17 +411,8 @@ public class ExpeGUI : MonoBehaviour
         if (!isEmpty) GUI.color = Color.white;
 
         GUILayout.BeginHorizontal();
-
-        if (Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == replayManager.replayShortcut)
-        {
-            replayManager.FastForward(fastforwardModes[nextFFMode]);
-            if (displayCameraView)
-            {
-                replayManager.ChangeCamera();
-            }
-            readerSliderValue = 0;
-        }
-        if (GUILayout.Button(!replaying || paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, isEmpty ? stylesManager.blockedImageButtonStyle : stylesManager.imageButtonStyle) && !isEmpty)
+        
+        if ((GUILayout.Button(!replaying || paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, isEmpty ? stylesManager.blockedImageButtonStyle : stylesManager.imageButtonStyle) || ShortcutIsPressed(replayManager.playPauseShortcut)) && !isEmpty)
         {
             if (!replaying || paused) currentBlinkingAlpha = 1;
             if (!replaying)
@@ -437,7 +435,7 @@ public class ExpeGUI : MonoBehaviour
         }
 
         if (!replaying) GUI.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
-        if (GUILayout.Button(stylesManager.stopSprite.texture, replaying ? stylesManager.imageButtonStyle : stylesManager.blockedImageButtonStyle) && replaying)
+        if ((GUILayout.Button(stylesManager.stopSprite.texture, replaying ? stylesManager.imageButtonStyle : stylesManager.blockedImageButtonStyle) || ShortcutIsPressed(replayManager.stopShortcut)) && replaying)
         {
             if (displayCameraView)
             {
@@ -599,7 +597,7 @@ public class ExpeGUI : MonoBehaviour
         GUITab newTab = currentTab;
         for (int i = 0; i < toolbarStrings.Length; i++)
         {
-            GUIStyle curStyle = recording || replaying || loading ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
+            GUIStyle curStyle = recording || (replaying && i == 0) || loading ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
             if (i == (int)currentTab)
             {
                 curStyle = stylesManager.tabButtonsStyleSelected;
@@ -609,7 +607,7 @@ public class ExpeGUI : MonoBehaviour
                 newTab = (GUITab)i;
             }
         }
-        if (!recording && !replaying && !loading && currentTab != newTab)
+        if (!recording && !(replaying && newTab==GUITab.TabRecord) && !loading && currentTab != newTab)
         {
             currentTab = newTab;
             currentTabHasChanged = true;

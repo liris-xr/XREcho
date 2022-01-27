@@ -28,7 +28,7 @@ public class XREcho : MonoBehaviour
     private void Awake()
     {
         if (instance)
-            Debug.LogError("2 Recording Managers: singleton design pattern broken");
+            Debug.LogError("2 XR Echo scripts: singleton design pattern broken");
 
         instance = this;
 
