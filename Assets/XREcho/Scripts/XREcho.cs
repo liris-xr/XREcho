@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(ExpeRecorderConfig))]
+[RequireComponent(typeof(XREchoConfig))]
 public class XREcho : MonoBehaviour
 {
     private static XREcho instance;

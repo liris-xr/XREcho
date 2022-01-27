@@ -25,7 +25,7 @@ public class GUIManager : MonoBehaviour
 
     // managers
     private XREcho xrEcho;
-    private ExpeRecorderConfig config;
+    private XREchoConfig config;
     private GUIStylesManager stylesManager;
     private LogToGUI logger;
     private RecordingManager recordingManager;
@@ -78,7 +78,7 @@ public class GUIManager : MonoBehaviour
     private void Start()
     {
         xrEcho = XREcho.GetInstance();
-        config = ExpeRecorderConfig.GetInstance();
+        config = XREchoConfig.GetInstance();
         stylesManager = GetComponent<GUIStylesManager>();
         recordingManager = RecordingManager.GetInstance();
         replayManager = ReplayManager.GetInstance();
@@ -151,6 +151,8 @@ public class GUIManager : MonoBehaviour
     private void OnGUI()
     {
         if (!xrEcho.displayGUI) return;
+
+        GUI.depth = 0;
 
         // Getting system state
         recording = recordingManager.IsRecording();
@@ -376,6 +378,7 @@ public class GUIManager : MonoBehaviour
 
             loading = true;
             shouldEndLoading = false;
+            Debug.Log("Loading replay " + curReplayRecord + "...");
             Thread t = new Thread(new ThreadStart(AsyncLoad));
             t.Start();
         }

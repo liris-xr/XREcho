@@ -1323,7 +1323,7 @@ MonoBehaviour:
     x: 20
     y: 175
     width: 270
-    height: 300
+    height: 124
 --- !u!114 &7624471816676135667
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1578,7 +1578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a5ff25c905d92945851d990975b0831, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frustumColor: {r: 0.25, g: 0.25, b: 0.5, a: 0.2}
+  frustumColor: {r: 0.23028658, g: 0.23028658, b: 0.6509434, a: 0.2}
   zFarFrustumViz: 1.5
 --- !u!1 &3895816479784697527
 GameObject:
@@ -1781,7 +1781,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   culture: 0
-  expeRecorderPath: ./XREchoData
+  expeRecorderPath: ./InteractionRecorderData
   project: project
   session: session
   AutoLoadLastVisitorSession: 0

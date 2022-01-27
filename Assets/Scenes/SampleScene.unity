@@ -156,11 +156,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!20 &150905808 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-  m_PrefabInstance: {fileID: 1740759116}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &246030651
 GameObject:
   m_ObjectHideFlags: 0
@@ -1666,49 +1661,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1674796905628458976, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_CameraType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2491597459821361259, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_HDR
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_AllowMSAA
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: orthographic
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_AllowDynamicResolution
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: expeRecorderPath
-      value: ./InteractionRecorderData
-      objectReference: {fileID: 0}
     - target: {fileID: 5877891664149530446, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_Name
       value: XR Echo
       objectReference: {fileID: 0}
     - target: {fileID: 5946512154932797044, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: guiRect.height
-      value: 300
-      objectReference: {fileID: 0}
-    - target: {fileID: 7301450442819779185, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: monitoringCamera
-      value: 
-      objectReference: {fileID: 150905808}
-    - target: {fileID: 8150750620650356689, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      value: 124
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}

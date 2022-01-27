@@ -84,7 +84,7 @@ public class LogToGUI : MonoBehaviour
     private void OnGUI()
     {
         if (!displayOnScreen) { return; }
-        GUI.depth = 100;
+        GUI.depth = 1;
 
         if (needGUIInit)
         {
@@ -101,6 +101,5 @@ public class LogToGUI : MonoBehaviour
         if (logs != "") GUILayout.TextArea(logs, textStyle);
         GUILayout.EndScrollView();
         GUILayout.EndArea();
-        GUI.depth = 0;
     }
 }
