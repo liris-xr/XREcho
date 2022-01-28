@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEditor;
 
 using System.IO;
 using System;
+using System.Reflection;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -69,6 +71,7 @@ public class RecordingManager : MonoBehaviour
     private int nbOriginalTrackedObjects;
     private bool keepRecordingOnNewScene = true;
     private bool recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
+    private GameObject eyeTracker;
 
     private CSVWriter metadataWriter;
     private CSVWriter objectsWriter;
@@ -195,9 +198,27 @@ public class RecordingManager : MonoBehaviour
             if (to.obj != null)
                 to.objPath = Utils.GetGameObjectPath(to.obj);
         }
+
+        if (recordEyeTracking && eyeTracker == null)
+        {
+            if (Utils.GetClassType("GetEyeTrackingData") == null)
+            {
+                Debug.LogError("Eye Tracking can not be activated : the EyeTracking folder has not been imported. You need to import it and to install the Vive SRanipal SDK.");
+                recordEyeTracking = false;
+            } else {
+                eyeTracker = GameObject.Find("XREchoEyeTracker");
+#if UNITY_EDITOR
+                if (eyeTracker == null) {
+                    GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/XREcho/EyeTracking/Prefabs/XREchoEyeTracker.prefab", typeof(GameObject));
+                    eyeTracker = (GameObject)Instantiate(prefab, transform);
+                    eyeTracker.name = "XREchoEyeTracker";
+                }
+#endif
+            }
+        }
         ComputeAllTrackedObjects();
     }
-
+    
     public List<TrackedObject> GetTrackedObjects()
     {
         return trackedObjects;
@@ -258,6 +279,7 @@ public class RecordingManager : MonoBehaviour
 
     private void RemoveTrackedObject(GameObject gameObject)
     {
+        if (gameObject == null) return;
         string objpath = Utils.GetGameObjectPath(gameObject);
         trackedObjects.Remove(GetTrackedObject(objpath));
     }
@@ -305,6 +327,7 @@ public class RecordingManager : MonoBehaviour
     private bool CanRelease(GameObject go)
     {
         if (go.tag == "MainCamera") return false;
+        if (recordEyeTracking && go == eyeTracker) return false;
         if (trackXRControllers && go.GetComponent<XRBaseController>() != null) return false;
         if (trackXRInteractables && go.GetComponent<XRBaseInteractable>() != null) return false;
         return true;
@@ -331,13 +354,12 @@ public class RecordingManager : MonoBehaviour
             AddTrackedObject(Camera.main.gameObject);
         if (recordEyeTracking)
         {
-            TrackedObject to = new TrackedObject();
-            to.objPath = "EyeTracking";
-            to.trackingRate = trackingRateHz;
-            trackedObjects.Add(to);
+            AddTrackedObject(eyeTracker);
+            if (eyeTracker == null)
+                Debug.LogError("EyeTracker object not found : eye tracking datas will not be recorded.");
         } else
         {
-            trackedObjects.Remove(GetTrackedObject("EyeTracking"));
+            RemoveTrackedObject(eyeTracker);
         }
         TrackControllerGameObjects();
         TrackInteractableGameObjects();

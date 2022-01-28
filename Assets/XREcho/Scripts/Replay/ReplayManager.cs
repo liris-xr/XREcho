@@ -62,7 +62,8 @@ public class ReplayManager : MonoBehaviour
     public GameObject controllerModel;
     public GameObject rightControllerModel;
     public GameObject eyeModel;
-
+    public GameObject notFoundModel;
+    
     [Space(8)]
     public KeyCode playPauseShortcut = KeyCode.P;
     public KeyCode stopShortcut = KeyCode.S;
@@ -218,6 +219,7 @@ public class ReplayManager : MonoBehaviour
         controllerModel = InitDefaultReplayModel(controllerModel, "DefaultControllerModel");
         rightControllerModel = InitDefaultReplayModel(rightControllerModel, "DefaultRightControllerModel");
         eyeModel = InitDefaultReplayModel(eyeModel, "DefaultEyeModel");
+        notFoundModel = InitDefaultReplayModel(notFoundModel, "NotFoundModel");
     }
 
     private GameObject InitDefaultReplayModel(GameObject model, string defaultName)
@@ -594,7 +596,6 @@ public class ReplayManager : MonoBehaviour
         }
 
         InstantiateClones();
-        //DisableClonesComponents();
         //AddReplayScripts();
         //MakeClonesTransparent();
         HideClones();
@@ -607,7 +608,6 @@ public class ReplayManager : MonoBehaviour
         List<Dictionary<string, object>> format = CSVReader.ReadCSV(filepath);
 
         ObjPathCache objPathCache = new ObjPathCache();
-        //GameObjectsManager gameObjectsManager = GameObjectsManager.GetInstance();
 
         foreach (Dictionary<string, object> entry in format)
         {
@@ -631,35 +631,41 @@ public class ReplayManager : MonoBehaviour
                 {
                     string objPath = (string)entry["replayGameObject"];
                     GameObject replayGameObject = GameObject.Find(objPath);
-
-                    //if (replayGameObject == null && gameObjectsManager != null)
-                    //{
-                    //    string[] pathParts = objPath.Split('/');
-                    //    string gameObjectName = pathParts[pathParts.Length - 1];
-                    //    replayGameObject = gameObjectsManager.GetGameObject(gameObjectName);
-                    //}
-
                     to.replayGameObject = replayGameObject;
                 }
-                if (to.objPath == "EyeTracking")
+                if (to.replayGameObject == null || to.replayGameObject == to.obj)
                 {
-                    to.obj = eyeModel;
-                    to.replayGameObject = eyeModel;
-                }
-                else if (to.obj != null && (to.replayGameObject == null || to.replayGameObject == to.obj))
-                {
-                    if (to.obj.tag == "MainCamera")
+                    if (to.obj != null)
                     {
-                        to.replayGameObject = cameraModel;
-                    } else if (to.obj.GetComponent<XRBaseController>() != null)
-                    {
-                        if (to.obj.name.Contains("Right"))
+                        if (to.obj.tag == "MainCamera")
                         {
-                            to.replayGameObject = rightControllerModel;
-                        } else
-                        {
-                            to.replayGameObject = controllerModel;
+                            to.replayGameObject = cameraModel;
                         }
+                        else if (to.obj.GetComponent<XRBaseController>() != null)
+                        {
+                            if (to.obj.name.Contains("Right"))
+                            {
+                                to.replayGameObject = rightControllerModel;
+                            }
+                            else
+                            {
+                                to.replayGameObject = controllerModel;
+                            }
+                        }
+                        else if (to.obj.name == "XREchoEyeTracker")
+                        {
+                            to.replayGameObject = eyeModel;
+                        }
+                    } else
+                    {
+                        string[] splited = to.objPath.Split('/');
+                        string soloName = splited[splited.Length - 1];
+                        if (soloName == "Main Camera")
+                            to.replayGameObject = cameraModel;
+                        else if (soloName == "XREchoEyeTracker")
+                            to.replayGameObject = eyeModel;
+                        else
+                            to.replayGameObject = notFoundModel;
                     }
                 }
             } else if (type.Equals("data"))

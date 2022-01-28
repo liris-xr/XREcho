@@ -4,10 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 
-//------------------UNCOMMENT IF YOU NEED EYETRACKING FOR HTC VIVE PRO EYE--------------------
-//using ViveSR;
-//using ViveSR.anipal.Eye;
-
 [RequireComponent(typeof(GUIStylesManager))]
 [RequireComponent(typeof(LogToGUI))]
 public class GUIManager : MonoBehaviour
@@ -97,7 +93,7 @@ public class GUIManager : MonoBehaviour
         currentTurningAngle = 0;
         
         displayCameraView = false;
-        displayGazeVisu = false;
+        displayGazeVisu = recordingManager.recordEyeTracking;
         needReplayListUpdate = false;
         nextFFMode = 0;
         replayProject = "";
@@ -135,6 +131,7 @@ public class GUIManager : MonoBehaviour
             replayManager.ReadRecording(root, recId);
             trajectoryManager.SetShowTrajectories(displayTrajectories);
             trajectoryManager.SetShowControlPoints(displayControlPoints);
+            ActivateGazeVisu();
             if (autoRead)
             {
                 autoRead = false;
@@ -226,34 +223,7 @@ public class GUIManager : MonoBehaviour
         if (Event.current.type == EventType.MouseDown)
         {
             CloseOtherDropdowns(null);
-        }
-
-        //------------------UNCOMMENT IF YOU NEED EYETRACKING FOR HTC VIVE PRO EYE--------------------
-        /*
-        if (GUILayout.Button("Set Parameter"))
-        {
-            EyeParameter parameter = new EyeParameter
-            {
-                gaze_ray_parameter = new GazeRayParameter(),
-            };
-            Error error = SRanipal_Eye_API.GetEyeParameter(ref parameter);
-            Debug.Log("GetEyeParameter: " + error + "\n" +
-                      "sensitive_factor: " + parameter.gaze_ray_parameter.sensitive_factor);
-
-            parameter.gaze_ray_parameter.sensitive_factor = parameter.gaze_ray_parameter.sensitive_factor == 1 ? 0.015f : 1;
-            error = SRanipal_Eye_API.SetEyeParameter(parameter);
-            Debug.Log("SetEyeParameter: " + error + "\n" +
-                      "sensitive_factor: " + parameter.gaze_ray_parameter.sensitive_factor);
-        }*/
-
-        //if (GUILayout.Button("Launch Calibration"))
-        //{
-        //    SRanipal_Eye_API.LaunchEyeCalibration(IntPtr.Zero);
-        //}
-    }
-    private bool ShortcutIsPressed(KeyCode shortcut)
-    {
-        return Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == shortcut;
+        }  
     }
 
     private void RecordGUI()
@@ -320,6 +290,13 @@ public class GUIManager : MonoBehaviour
         GUI.color = Color.white;
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
+        if (recordingManager.recordEyeTracking)
+        {
+            if (GUILayout.Button("Launch Eye Calibration"))
+            {
+                Utils.GetClassType("GetEyeTrackingData").GetMethod("LaunchEyeCalibration").Invoke(null, null);
+            }
+        }
     }
 
 
@@ -334,7 +311,7 @@ public class GUIManager : MonoBehaviour
             replayProjectDropdown = new CustomGUIDropdown(Utils.GetSubfolders(root));
             if (!replayProjectDropdown.SetSelectedEntry(project))
             {
-                Debug.LogError("The current recording's project folder was not found!");
+                Debug.LogWarning("No records corresponding to the current project have been found.");
                 replayProjectDropdown.SetSelectedEntry(replayProject);
             }
         }
@@ -370,7 +347,7 @@ public class GUIManager : MonoBehaviour
         int recId = LabeledDropdown(" Record:  ", replayRecordDropdown);
         string curReplayRecord = replayRecordDropdown.GetCurrentEntry();
 
-        if (curReplayRecord != replayRecord)
+        if (curReplayRecord != replayRecord && curReplayRecord != "--- empty list ---")
         {
             replayRecord = curReplayRecord;
             currentTurningAngle = 0;
@@ -389,8 +366,7 @@ public class GUIManager : MonoBehaviour
         if (newGazeVisu != displayGazeVisu)
         {
             displayGazeVisu = newGazeVisu;
-            foreach (MonoBehaviour showViz in transform.root.GetComponentsInChildren<ShowGaze>(true))
-                showViz.enabled = displayGazeVisu;
+            ActivateGazeVisu();
         }
     }
 
@@ -553,6 +529,18 @@ public class GUIManager : MonoBehaviour
         tmp = Camera.main.targetDisplay;
         Camera.main.targetDisplay = top.targetDisplay;
         top.targetDisplay = tmp;
+    }
+
+    private bool ShortcutIsPressed(KeyCode shortcut)
+    {
+        return Event.current.isKey && Event.current.type == EventType.KeyDown && Event.current.keyCode == shortcut;
+    }
+
+    private void ActivateGazeVisu()
+    {
+        foreach (MonoBehaviour showViz in transform.root.GetComponentsInChildren<ShowGaze>(true))
+            if (showViz.gameObject.name != "XREchoEyeTracker")
+                showViz.enabled = displayGazeVisu;
     }
 
     private void AsyncLoad()

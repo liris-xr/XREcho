@@ -31,6 +31,7 @@ public class CustomGUIDropdown
         if (ListLength == 0)
         {
             DropdownList = new List<string> { "--- empty list ---" };
+            ListLength = DropdownList.Count;
         }
         if (defaultId >= 0 && defaultId < ListLength)
         {

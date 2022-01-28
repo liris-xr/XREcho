@@ -7,6 +7,11 @@ using System.Collections.Generic;
 
 public class Utils
 {
+    public static Type GetClassType(string className)
+    {
+        return typeof(Utils).Assembly.GetType(className);
+    }
+
     public static string GetRenderingPipeline()
     {
         if (GraphicsSettings.currentRenderPipeline)
@@ -52,10 +57,9 @@ public class Utils
             dir = new DirectoryInfo(folder);
             subs = dir.GetDirectories();
         }
-        catch (DirectoryNotFoundException ex)
+        catch
         {
             subs = new DirectoryInfo[] { };
-            Debug.Log("" + ex);
         }
 
         foreach (DirectoryInfo s in subs)
