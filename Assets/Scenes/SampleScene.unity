@@ -455,10 +455,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 441263898}
-  - component: {fileID: 441263897}
   - component: {fileID: 441263899}
+  - component: {fileID: 441263897}
   m_Layer: 0
-  m_Name: XR Rig
+  m_Name: XR Origin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -473,15 +473,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 441263896}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7448815bd5148434682b3d931066cd10, type: 3}
+  m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2029404570}
   m_OriginBaseGameObject: {fileID: 441263896}
   m_CameraFloorOffsetObject: {fileID: 1348072641}
   m_RequestedTrackingOriginMode: 2
-  m_CameraYOffset: 1.36144
-  m_CameraGameObject: {fileID: 2029404567}
+  m_CameraYOffset: 1.1176
 --- !u!4 &441263898
 Transform:
   m_ObjectHideFlags: 0
@@ -489,14 +488,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 441263896}
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.881, y: 0, z: -0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1348072642}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &441263899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -552,7 +551,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &653260035
 GameObject:
@@ -1787,6 +1786,90 @@ PrefabInstance:
     - target: {fileID: 285498115758991250, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackXRControllers
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackXRInteractables
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[0].obj
+      value: 
+      objectReference: {fileID: 2029404567}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[1].obj
+      value: 
+      objectReference: {fileID: 386672831}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[2].obj
+      value: 
+      objectReference: {fileID: 1890242019}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[3].obj
+      value: 
+      objectReference: {fileID: 656633986}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[4].obj
+      value: 
+      objectReference: {fileID: 1046319947}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[5].obj
+      value: 
+      objectReference: {fileID: 1674374833}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[0].objPath
+      value: /XR Origin/Camera Offset/Main Camera
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[1].objPath
+      value: /XR Origin/Camera Offset/LeftHand Controller
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[2].objPath
+      value: /XR Origin/Camera Offset/RightHand Controller
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[3].objPath
+      value: /Scene/XRGrabInteractables/Cube (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[4].objPath
+      value: /Scene/XRGrabInteractables/Cube (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[5].objPath
+      value: /Scene/XRGrabInteractables/Cube
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[1].trackCamera
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[2].trackCamera
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[3].trackCamera
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[5].trackCamera
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: session
+      value: session
+      objectReference: {fileID: 0}
+    - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: expeRecorderPath
+      value: ./XREchoData
       objectReference: {fileID: 0}
     - target: {fileID: 5877891664149530446, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_Name

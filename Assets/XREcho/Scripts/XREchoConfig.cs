@@ -35,10 +35,10 @@ public class XREchoConfig : MonoBehaviour
     private string recordingsFolder;
     public string GetRecordingsFolder() { return recordingsFolder; }
 
-    public string project = "defaultProject";
+    public string project = "project";
     private string projectFolder;
 
-    public string session = "defaultSession";
+    public string session = "session";
     private string sessionFolder;
     public string GetSessionFolder() { return sessionFolder; }
 
@@ -66,8 +66,8 @@ public class XREchoConfig : MonoBehaviour
         currentScene = SceneManager.GetActiveScene().name;
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        ComputePaths();
         ImportConfig();
+        ComputePaths();
     }
 
     private void Start()
@@ -144,13 +144,20 @@ public class XREchoConfig : MonoBehaviour
     public void OnValidate()
     {
         if (project.Equals(""))
+        {
             Debug.LogError("Project name can't be empty");
+            project = "project";
+        }
 
         if (session.Equals(""))
+        {
             Debug.LogError("Session name can't be empty");
+            session = "session";
+        }
 
         ComputePaths();
         ApplyCulture();
+        ExportConfig();
     }
 
     private void ImportConfig()
