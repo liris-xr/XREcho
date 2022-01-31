@@ -193,6 +193,10 @@ public class RecordingManager : MonoBehaviour
 
     private void OnValidate()
     {
+#if UNITY_EDITOR
+        if (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null) 
+            return;
+
         foreach (TrackedObject to in trackedObjects)
         {
             if (to.obj != null)
@@ -207,18 +211,17 @@ public class RecordingManager : MonoBehaviour
                 recordEyeTracking = false;
             } else {
                 eyeTracker = GameObject.Find("XREchoEyeTracker");
-#if UNITY_EDITOR
                 if (eyeTracker == null) {
                     GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/XREcho/EyeTracking/Prefabs/XREchoEyeTracker.prefab", typeof(GameObject));
                     eyeTracker = (GameObject)Instantiate(prefab, transform);
                     eyeTracker.name = "XREchoEyeTracker";
                 }
-#endif
             }
         }
         ComputeAllTrackedObjects();
+#endif
     }
-    
+
     public List<TrackedObject> GetTrackedObjects()
     {
         return trackedObjects;

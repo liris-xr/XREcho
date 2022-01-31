@@ -45,7 +45,7 @@ public class XREchoConfig : MonoBehaviour
     [Space(8)]
     public bool AutoLoadLastVisitorSession = false;
     public string visitorFilePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "XREcho", "visitors_metadata.csv");
-    private string configFile;
+    private string configFile = "./XREcho_config.csv";
 
     [Header("Separators and formats")]
     public char filenameFieldsSeparator = '_';
@@ -65,7 +65,7 @@ public class XREchoConfig : MonoBehaviour
 
         currentScene = SceneManager.GetActiveScene().name;
         SceneManager.sceneLoaded += OnSceneLoaded;
-
+        
         ImportConfig();
         ComputePaths();
     }
@@ -97,6 +97,7 @@ public class XREchoConfig : MonoBehaviour
 
     public void NewPath(string newPath)
     {
+        Debug.Log("new path " + newPath);
         expeRecorderPath = newPath;
         ComputePaths();
         recordingManager.NewSession();
@@ -138,7 +139,6 @@ public class XREchoConfig : MonoBehaviour
         recordingsFolder = Path.Combine(expeRecorderPath, "Recordings");
         projectFolder = Path.Combine(recordingsFolder, project);
         sessionFolder = Path.Combine(projectFolder, session);
-        configFile = Path.Combine(expeRecorderPath, "config.csv");
     }
 
     public void OnValidate()
@@ -157,7 +157,12 @@ public class XREchoConfig : MonoBehaviour
 
         ComputePaths();
         ApplyCulture();
-        ExportConfig();
+
+#if UNITY_EDITOR
+        if (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null) {
+            ExportConfig();
+        }
+#endif
     }
 
     private void ImportConfig()
@@ -166,7 +171,8 @@ public class XREchoConfig : MonoBehaviour
 
         if (!File.Exists(configFile))
         {
-            Debug.LogWarning("Config file not found: using default config");
+            Debug.Log("Creating config file: " + configFile);
+            ExportConfig();
             return;
         }
 

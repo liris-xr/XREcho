@@ -38,7 +38,7 @@ public class XREchoEditor : Editor
     {
         serializedObject.Update();
 
-        if (((MonoBehaviour)target).isActiveAndEnabled)
+        if (((MonoBehaviour)target).isActiveAndEnabled && UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
         {
             if (allIsOk)
             {
@@ -47,7 +47,8 @@ public class XREchoEditor : Editor
                 {
                     isCheckGroup = true;
                 }
-            } else
+            }
+            else
             {
                 isCheckGroup = EditorGUILayout.BeginFoldoutHeaderGroup(isCheckGroup, "Hierarchy check");
                 if (isCheckGroup)

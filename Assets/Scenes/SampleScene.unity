@@ -1743,6 +1743,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 241373220910265958, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 285498115758991250, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -1863,9 +1867,45 @@ PrefabInstance:
       propertyPath: trackedObjects.Array.data[5].trackCamera
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[0].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[1].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[2].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[3].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[4].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: trackedObjects.Array.data[5].trackingInterval
+      value: Infinity
+      objectReference: {fileID: 0}
+    - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: session
       value: session
+      objectReference: {fileID: 0}
+    - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: visitorFilePath
+      value: C:\Users\louis\Documents\XREcho\visitors_metadata.csv
       objectReference: {fileID: 0}
     - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: expeRecorderPath
@@ -1875,12 +1915,24 @@ PrefabInstance:
       propertyPath: m_Name
       value: XR Echo
       objectReference: {fileID: 0}
+    - target: {fileID: 5877891664149530446, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5946512154932797044, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: guiRect.height
-      value: 1127
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 7301450442819779185, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7301450442819779185, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: displayGUI
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8150750620650356689, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []

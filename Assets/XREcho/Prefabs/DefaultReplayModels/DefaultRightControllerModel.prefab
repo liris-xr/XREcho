@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3110834445503961999}
   m_Layer: 0
-  m_Name: DefaultReplayRightHandModel
+  m_Name: DefaultRightControllerModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 2547862288352488151}
   - component: {fileID: 832317231885915037}
   - component: {fileID: 4226986956365248265}
+  - component: {fileID: 4371237025031248603}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -90,7 +91,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9f25fc1ee2a663e4eacd7c97be2f2b1a, type: 2}
+  - {fileID: 2100000, guid: 782707df1893e90429ac12f94a70d28a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -112,3 +113,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4371237025031248603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6768343162185529836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47cfcb0326e0b849be81e85e70ddf79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialName: replayHand

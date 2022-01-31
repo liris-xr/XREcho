@@ -40,7 +40,7 @@ public class Utils
         }
         catch (IOException ex)
         {
-            Debug.Log(ex.Message);
+            Debug.LogError(ex.Message);
             return false;
         }
 

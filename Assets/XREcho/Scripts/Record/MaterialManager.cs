@@ -48,7 +48,7 @@ public class MaterialManager : MonoBehaviour
             MaterialEntry newMat = new MaterialEntry();
             newMat.name = name;
             string materialSuffix = isLegacy ? "_Legacy" : "_URP";
-            newMat.mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/XREcho/Materials/" + materialName + materialSuffix + ".mat", typeof(Material));
+            newMat.mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/XREcho/" + materialName + materialSuffix + ".mat", typeof(Material));
             list[list.Length-1] = newMat;
             if (isLegacy)
             {
@@ -64,9 +64,12 @@ public class MaterialManager : MonoBehaviour
     {
         for (int i=0; i<2; i++)
         {
-            AddMaterial("gaze", "GazeMaterial", i == 0);
-            AddMaterial("cameraFrustum", "GazeMaterial", i == 0);
-            AddMaterial("object", "ObjectMaterial", i == 0);
+            AddMaterial("gaze", "Materials/GazeMaterial", i == 0);
+            AddMaterial("cameraFrustum", "Materials/GazeMaterial", i == 0);
+            AddMaterial("object", "Materials/ObjectMaterial", i == 0);
+            AddMaterial("hand", "Prefabs/Hands/Materials/HandMaterial", i == 0);
+            AddMaterial("replayHand", "Prefabs/Hands/Materials/ReplayHandMaterial", i == 0);
+            AddMaterial("notFound", "Materials/NotFoundMaterial", i == 0);
         }
     }
 #endif

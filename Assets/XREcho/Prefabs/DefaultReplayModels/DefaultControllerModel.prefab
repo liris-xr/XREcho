@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9036164780135770243}
   - component: {fileID: 6174937160882409929}
   - component: {fileID: 7247543597218821469}
+  - component: {fileID: 7238851208301295916}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -59,7 +60,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9f25fc1ee2a663e4eacd7c97be2f2b1a, type: 2}
+  - {fileID: 2100000, guid: 782707df1893e90429ac12f94a70d28a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -81,6 +82,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7238851208301295916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 274940044622265272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47cfcb0326e0b849be81e85e70ddf79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialName: replayHand
 --- !u!1 &9105437748702872417
 GameObject:
   m_ObjectHideFlags: 0
@@ -91,7 +105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8437163839504407003}
   m_Layer: 0
-  m_Name: DefaultReplayLeftHandModel
+  m_Name: DefaultControllerModel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

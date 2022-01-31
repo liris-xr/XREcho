@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 1258480232545395409}
   - component: {fileID: 2329134219694638661}
   - component: {fileID: 438048930745277287}
+  - component: {fileID: 3197092049707237653}
   m_Layer: 0
   m_Name: default
   m_TagString: Untagged
@@ -91,7 +92,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: cd610b018da67ab42bcc9c0792317128, type: 2}
+  - {fileID: 2100000, guid: d026f2917507ac043a07a6d3966a42e2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -126,3 +127,16 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.3
   m_Center: {x: -0.3, y: 1, z: 0.2}
+--- !u!114 &3197092049707237653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122287367197296800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47cfcb0326e0b849be81e85e70ddf79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialName: hand
