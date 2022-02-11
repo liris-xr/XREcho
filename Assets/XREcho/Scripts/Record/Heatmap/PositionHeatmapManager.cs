@@ -4,6 +4,8 @@ using UnityEngine;
 public class PositionHeatmapManager : MonoBehaviour
 {
     private static PositionHeatmapManager _instance;
+
+    private float _transparency = 1f;
     
     private GameObject _heatmapPlane;
     private ReplayManager _replayManager;
@@ -61,6 +63,12 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         ComputeAndApplyHeatmap();
     }
+
+    public void SetTransparency(float transparency)
+    {
+        _transparency = transparency;
+        _heatmapPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
+    }
     
     /**
      * - Fetch the positions from the record save
@@ -74,7 +82,7 @@ public class PositionHeatmapManager : MonoBehaviour
         var heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, _heatmapPlane);
         var heatmapMaterial = new Material(_heatmapMaterial)
         {
-            mainTexture = heatmapTexture, mainTextureScale = Vector2.one
+            mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
         };
         _heatmapPlane.GetComponent<Renderer>().material = heatmapMaterial;
     }

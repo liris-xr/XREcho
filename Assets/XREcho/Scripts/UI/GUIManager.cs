@@ -69,6 +69,8 @@ public class GUIManager : MonoBehaviour
     private bool displayTrajectories;
     private bool displayControlPoints;
     private PositionHeatmapManager positionHeatmapManager;
+
+    private float lastPositionHeatmapTransparency = 1f;
     
     private void Start()
     {
@@ -491,10 +493,23 @@ public class GUIManager : MonoBehaviour
 
         if (showPositionHeatmap)
         {
+            GUILayout.BeginVertical("box");
+
+            GUILayout.Label("Heatmap transparency");
+            var transparencyValue = GUILayout.HorizontalSlider(lastPositionHeatmapTransparency, 0f, 1f);
+
+            if (Math.Abs(lastPositionHeatmapTransparency - transparencyValue) > 10e-6)
+            {
+                positionHeatmapManager.SetTransparency(transparencyValue);
+                lastPositionHeatmapTransparency = transparencyValue;
+            }
+            
             if (GUILayout.Button("Force re-generate heatmap"))
             {
                 positionHeatmapManager.ForceRegenerate();
             }
+            
+            GUILayout.EndVertical();
         }
 
         if (GUILayout.Button(new GUIContent(" Take Screenshot", stylesManager.screenshotSprite.texture), stylesManager.screenshotButtonStyle))
