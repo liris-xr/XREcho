@@ -9,8 +9,10 @@
         _diameter = diameter;
     }
     
-    public float[,] Apply(int[,] grid, int gridWidth, int gridHeight)
+    public float[,] Apply(float[,] grid)
     {
+        var gridHeight = grid.GetLength(0);
+        var gridWidth = grid.GetLength(1);
         var newGridValues = new float[gridHeight, gridWidth];
         var radius = _diameter / 2;
 
@@ -18,9 +20,6 @@
         {
             for (var j = 0; j < gridHeight; j++)
             {
-                if (grid[j, i] == 0)
-                    continue;
-
                 for (var dx = -radius; dx <= radius; dx++)
                 {
                     for (var dy = -radius; dy <= radius; dy++)

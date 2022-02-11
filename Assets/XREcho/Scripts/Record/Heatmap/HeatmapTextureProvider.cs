@@ -3,15 +3,16 @@ using UnityEngine;
 
 public class HeatmapTextureProvider : MonoBehaviour, IHeatmapTextureProvider
 {
-    public Texture2D HeatmapToTexture(float[,] heatmap, int w, int h)
+    public Texture2D HeatmapToTexture(float[,] heatmap)
     {
-        var max = heatmap.Cast<float>().Max();
+        var h = heatmap.GetLength(0);
+        var w = heatmap.GetLength(1);
         var pixels = new Color[w * h];
         var texture = new Texture2D(w, h);
 
         for (var i = 0; i < pixels.Length; i++)
         {
-            pixels[i] = HeatMapColorForValue(heatmap[h - i / h - 1, w - i % h - 1] / max);
+            pixels[i] = HeatMapColorForValue(heatmap[h - i / h - 1, w - i % h - 1]);
         }
 
         texture.SetPixels(pixels);

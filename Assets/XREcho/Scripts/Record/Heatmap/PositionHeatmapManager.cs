@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class PositionHeatmapManager : MonoBehaviour
@@ -9,6 +11,7 @@ public class PositionHeatmapManager : MonoBehaviour
     
     private GameObject _heatmapPlane;
     private ReplayManager _replayManager;
+    private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
 
     private Material _heatmapMaterial;
@@ -27,6 +30,7 @@ public class PositionHeatmapManager : MonoBehaviour
     private void Start()
     {
         _replayManager = ReplayManager.GetInstance();
+        _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
     
@@ -68,6 +72,36 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         _transparency = transparency;
         _heatmapPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
+    }
+
+    public void ExportRawData()
+    {
+        var path = Path.Combine(_config.GetExpeRecorderPath(), "Heatmaps");
+        path = Path.Combine(path, _config.project);
+        path = Path.Combine(path, _config.session);
+        Utils.CreateDirectoryIfNotExists(path);
+        
+        var filename = "position_heatmap_" + DateTime.Now.ToString(_config.dateFormat);
+        path = path + '/' + filename + ".csv";
+
+        var rawHeatmap = _positionHeatmapProvider.GetCachedRawHeatmap();
+        var gaussianHeatmap = _positionHeatmapProvider.GetCachedGaussianHeatmap();
+
+        Debug.Assert(rawHeatmap.GetLength(0) == gaussianHeatmap.GetLength(0));
+        Debug.Assert(rawHeatmap.GetLength(1) == gaussianHeatmap.GetLength(1));
+        
+        var csvWriter = new CSVWriter(path);
+        csvWriter.WriteLine("gridX", "gridY", "Normalized raw value", "Normalized gaussian value");
+        
+        for (var y = 0; y < rawHeatmap.GetLength(0); y++)
+        {
+            for (var x = 0; x < rawHeatmap.GetLength(1); x++)
+            {
+                csvWriter.WriteLine(x, y, rawHeatmap[y, x], gaussianHeatmap[y, x]);
+            }
+        }
+
+        csvWriter.Close();
     }
     
     /**

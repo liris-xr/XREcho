@@ -509,6 +509,11 @@ public class GUIManager : MonoBehaviour
                 positionHeatmapManager.ForceRegenerate();
             }
             
+            if (GUILayout.Button("Export raw data"))
+            {
+                positionHeatmapManager.ExportRawData();
+            }
+            
             GUILayout.EndVertical();
         }
 
