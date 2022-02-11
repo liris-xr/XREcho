@@ -1,8 +1,0 @@
-type,trackedData,position,rotation,camera,trackingRate,replayGameObject,replayScripts
-object,/XR Rig/Camera Offset/Main Camera,True,True,True,100,/Interaction Recorder/Replay Models/VRCameraModel,ShowCameraFrustum
-object,/XR Rig/Camera Offset/LeftHand Controller,True,True,False,100,/Interaction Recorder/Replay Models/LeftHandSphere,
-object,/XR Rig/Camera Offset/RightHand Controller,True,True,False,100,/Interaction Recorder/Replay Models/RightHandSphere,
-object,/Canvas (Environment)/Interaction Recorder/Replay Models/Eye,False,False,False,100,/Interaction Recorder/Replay Models/Eye,ShowGaze
-object,/Scene/XRGrabInteractables/Cube (2),True,True,False,100,,
-object,/Scene/XRGrabInteractables/Cube (1),True,True,False,100,,
-object,/Scene/XRGrabInteractables/Cube,True,True,False,100,,

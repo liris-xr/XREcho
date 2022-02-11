@@ -30,7 +30,7 @@ using UnityEngine.XR.Interaction.Toolkit;
  * - Put every camera on different display + switch display buttons + switch display on headset + fix camera offset in HTC
  * - Don't create empty game objects for interactable not here
  * - remove scene from metadata file name?
- * - PRIORITY+++++++++++++: check pour stocker eyeData à partir du recordingManager?
+ * - PRIORITY+++++++++++++: check pour stocker eyeData Ã  partir du recordingManager?
  * - PRIORITY++++: Record/replay on scene load on ExpeRecorder
  * - PRIORITY+++++: Check if writing empty string works
  * - PRIORITY++: voir comment enregistrer button presses on HTC Vive AND ADD HEADSET REMOVED
