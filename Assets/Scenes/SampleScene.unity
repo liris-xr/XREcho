@@ -489,7 +489,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 441263896}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.563, y: 1.171, z: -2.063}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1348072642}
@@ -1869,31 +1869,67 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[0].trackingInterval
-      value: Infinity
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[1].trackingInterval
-      value: Infinity
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[2].trackingInterval
-      value: Infinity
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[3].trackingInterval
-      value: Infinity
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[4].trackingInterval
-      value: Infinity
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[5].trackingInterval
-      value: Infinity
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3148109975281738623, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3590300920321419382, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4620742586810499730, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: heatmapWidth
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4620742586810499730, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: heatmapHeight
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: URPMaterials.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: legacyMaterials.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: URPMaterials.Array.data[6].mat
+      value: 
+      objectReference: {fileID: 2100000, guid: 66b3741107d4d524d87d6bb941dc423e, type: 2}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: URPMaterials.Array.data[6].name
+      value: heatmap
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: legacyMaterials.Array.data[6].mat
+      value: 
+      objectReference: {fileID: 2100000, guid: f525de63b8f97ad4a8b971efaa493896, type: 2}
+    - target: {fileID: 4674789761011483171, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
+      propertyPath: legacyMaterials.Array.data[6].name
+      value: heatmap
       objectReference: {fileID: 0}
     - target: {fileID: 5742478296022268314, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: session
@@ -1921,7 +1957,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5946512154932797044, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: guiRect.height
-      value: 300
+      value: 1127
       objectReference: {fileID: 0}
     - target: {fileID: 7301450442819779185, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_Enabled
@@ -2133,6 +2169,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 0
   m_Antialiasing: 0
   m_AntialiasingQuality: 2

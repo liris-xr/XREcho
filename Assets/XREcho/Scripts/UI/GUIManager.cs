@@ -65,11 +65,10 @@ public class GUIManager : MonoBehaviour
 
     // Analyze variables
     private bool displaySceneTHM;
-    private bool displayCurrentTHM;
+    private bool displayPositionHeatmap;
     private bool displayTrajectories;
     private bool displayControlPoints;
-    private TrajectoryHeatmap currentTrajectoryHeatmap;
-    private TrajectoryHeatmap sceneTrajectoryHeatmap;
+    private PositionHeatmapManager positionHeatmapManager;
     
     private void Start()
     {
@@ -79,6 +78,7 @@ public class GUIManager : MonoBehaviour
         recordingManager = RecordingManager.GetInstance();
         replayManager = ReplayManager.GetInstance();
         trajectoryManager = TrajectoryManager.GetInstance();
+        positionHeatmapManager = PositionHeatmapManager.GetInstance();
 
         OnValidate();
         project = config.project;
@@ -101,7 +101,7 @@ public class GUIManager : MonoBehaviour
         replayRecord = "";
 
         displaySceneTHM = false;
-        displayCurrentTHM = false;
+        displayPositionHeatmap = false;
         displayTrajectories = trajectoryManager.showTrajectories;
         displayControlPoints = trajectoryManager.showControlPoints;
 
@@ -457,7 +457,6 @@ public class GUIManager : MonoBehaviour
         {
             SetCurrentCamera(true);
             trajectoryManager.CheckVisibilities();
-            currentTrajectoryHeatmap = null;
         }
 
         bool newTraj = GUILayout.Toggle(displayTrajectories, " Trajectories (Recorded & Replayed)", stylesManager.toggleStyle);
@@ -483,18 +482,19 @@ public class GUIManager : MonoBehaviour
             trajectoryManager.SetShowControlPoints(displayControlPoints);
         }
 
-        bool newCurTHM = GUILayout.Toggle(displayCurrentTHM, " Current Session Trajectories Heatmap", stylesManager.toggleStyle);
-        if (newCurTHM != displayCurrentTHM)
+        var showPositionHeatmap = GUILayout.Toggle(displayPositionHeatmap, "Position heatmap", stylesManager.toggleStyle);
+        if (showPositionHeatmap != displayPositionHeatmap)
         {
-            displayCurrentTHM = newCurTHM;
-            currentTrajectoryHeatmap = ToggleTHM(false);
+            displayPositionHeatmap = showPositionHeatmap;
+            positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
         }
 
-        bool newTHM = GUILayout.Toggle(displaySceneTHM, " All Projects Trajectories Heatmap", stylesManager.toggleStyle);
-        if (newTHM != displaySceneTHM)
+        if (showPositionHeatmap)
         {
-            displaySceneTHM = newTHM;
-            sceneTrajectoryHeatmap = ToggleTHM(true);
+            if (GUILayout.Button("Force re-generate heatmap"))
+            {
+                positionHeatmapManager.ForceRegenerate();
+            }
         }
 
         if (GUILayout.Button(new GUIContent(" Take Screenshot", stylesManager.screenshotSprite.texture), stylesManager.screenshotButtonStyle))
@@ -551,33 +551,6 @@ public class GUIManager : MonoBehaviour
         replayManager.ReadObjectsDataFile(root, recId);
         shouldEndLoading = true;
     }
-
-    private TrajectoryHeatmap ToggleTHM(bool computeAllScene)
-    {
-        TrajectoryHeatmap heatmap = computeAllScene ? sceneTrajectoryHeatmap : currentTrajectoryHeatmap;
-        if (heatmap == null)
-        {
-            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-
-            heatmap = new TrajectoryHeatmap(xrEcho.trajectoryHeatmapResolution);
-            if (!computeAllScene)
-            {
-                heatmap.ComputeCurrentHeatmap(0);
-            } else
-            {
-                heatmap.ComputeSceneHeatmap(0);
-            }
-
-            sw.Stop();
-            Debug.Log("Heatmap Computation Time: " + sw.Elapsed);
-        }
-        else
-        {
-            heatmap.ToggleHeatmap();
-        }
-        return heatmap;
-    }
-
 
     //                        toolbar related methods
     // -----------------------------------------------------------------------

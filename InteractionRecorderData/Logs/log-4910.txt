@@ -1,5 +1,0 @@
-Looking for recordings in ./InteractionRecorderData\Recordings\project\session
-Number of recordings found = 1
-Reading 21-12-14-14-19-44_objectsData_SampleScene.csv
-Adding ShowCameraFrustum to VRCameraModel(Clone) (UnityEngine.GameObject)
-Adding ShowCameraFrustum to VRCameraModel(Clone) (UnityEngine.GameObject)
