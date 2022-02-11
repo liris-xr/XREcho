@@ -68,13 +68,13 @@ public class PositionHeatmapProvider : MonoBehaviour
         var heatmapHeight = Mathf.FloorToInt(pixelsPerMeter * bounds.size.z);
         
         var gaussian = _gaussianProvider.CreateGaussian();
-        var posHeatmap = NormalizeHeatmap(CreatePositionHeatmapGrid(heatmapWidth, heatmapHeight, positions, bounds.min, bounds.size));
-        var posHeatmapGaussian = NormalizeHeatmap(gaussian.Apply(posHeatmap));
+        var posHeatmap = CreatePositionHeatmapGrid(heatmapWidth, heatmapHeight, positions, bounds.min, bounds.size);
+        var posHeatmapGaussian = gaussian.Apply(posHeatmap);
         
         _cachedRawHeatmap = posHeatmap;
         _cachedGaussianHeatmap = posHeatmapGaussian;
 
-        return _heatmapTextureProvider.HeatmapToTexture(posHeatmapGaussian);
+        return _heatmapTextureProvider.HeatmapToTexture(NormalizeHeatmap(posHeatmapGaussian));
     }
 
     public float[,] GetCachedRawHeatmap()

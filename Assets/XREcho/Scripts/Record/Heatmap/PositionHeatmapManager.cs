@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class PositionHeatmapManager : MonoBehaviour
@@ -11,6 +12,7 @@ public class PositionHeatmapManager : MonoBehaviour
     
     private GameObject _heatmapPlane;
     private ReplayManager _replayManager;
+    private RecordingManager _recordingManager;
     private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
 
@@ -30,6 +32,7 @@ public class PositionHeatmapManager : MonoBehaviour
     private void Start()
     {
         _replayManager = ReplayManager.GetInstance();
+        _recordingManager = RecordingManager.GetInstance();
         _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
@@ -84,8 +87,8 @@ public class PositionHeatmapManager : MonoBehaviour
         var filename = "position_heatmap_" + DateTime.Now.ToString(_config.dateFormat);
         path = path + '/' + filename + ".csv";
 
-        var rawHeatmap = _positionHeatmapProvider.GetCachedRawHeatmap();
-        var gaussianHeatmap = _positionHeatmapProvider.GetCachedGaussianHeatmap();
+        var rawHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedRawHeatmap());
+        var gaussianHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedGaussianHeatmap());
 
         Debug.Assert(rawHeatmap.GetLength(0) == gaussianHeatmap.GetLength(0));
         Debug.Assert(rawHeatmap.GetLength(1) == gaussianHeatmap.GetLength(1));
@@ -119,6 +122,16 @@ public class PositionHeatmapManager : MonoBehaviour
             mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
         };
         _heatmapPlane.GetComponent<Renderer>().material = heatmapMaterial;
+    }
+    
+    /**
+     * Return the duration associated with the hottest point of the heatmap (in seconds).
+     * This is useful for interpreting the scale of the heatmap, the hottest point is where the player stayed the longest.
+     */
+    public float GetMaxDurationValue()
+    {
+        var max = _positionHeatmapProvider.GetCachedRawHeatmap().Cast<float>().Max();
+        return max * 1000 / _recordingManager.trackingRateHz;
     }
     
     private IEnumerable<Vector3> LoadRecordPositions()

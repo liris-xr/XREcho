@@ -494,6 +494,9 @@ public class GUIManager : MonoBehaviour
         if (showPositionHeatmap)
         {
             GUILayout.BeginVertical("box");
+            
+            GUILayout.Label($"Min duration: 0s");
+            GUILayout.Label($"Max duration: {positionHeatmapManager.GetMaxDurationValue()}s");
 
             GUILayout.Label("Heatmap transparency");
             var transparencyValue = GUILayout.HorizontalSlider(lastPositionHeatmapTransparency, 0f, 1f);
@@ -503,7 +506,7 @@ public class GUIManager : MonoBehaviour
                 positionHeatmapManager.SetTransparency(transparencyValue);
                 lastPositionHeatmapTransparency = transparencyValue;
             }
-            
+
             if (GUILayout.Button("Force re-generate heatmap"))
             {
                 positionHeatmapManager.ForceRegenerate();
