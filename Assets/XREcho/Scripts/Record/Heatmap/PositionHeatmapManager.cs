@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public class PositionHeatmapManager : MonoBehaviour
 {
+    public GameObject heatmapProjectionPlane;
+    
     private static PositionHeatmapManager _instance;
 
     private float _transparency = 1f;
     
-    private GameObject _heatmapPlane;
     private ReplayManager _replayManager;
     private RecordingManager _recordingManager;
     private XREchoConfig _config;
@@ -26,7 +28,6 @@ public class PositionHeatmapManager : MonoBehaviour
             Debug.LogError("2 position heatmap manager: singleton design pattern broken");
 
         _instance = this;
-        InitHeatmapPlane();
     }
     
     private void Start()
@@ -36,21 +37,6 @@ public class PositionHeatmapManager : MonoBehaviour
         _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
-    
-    private void InitHeatmapPlane()
-    {
-        if (_heatmapPlane != null)
-            Destroy(_heatmapPlane);
-
-        _heatmapPlane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        _heatmapPlane.name = "Position heatmap";
-        _heatmapPlane.transform.parent = transform;
-        
-        // Put the plane above ground level to see it
-        _heatmapPlane.transform.position += new Vector3(0.0f, 0.01f, 0.0f);
-        
-        _heatmapPlane.SetActive(false);
-    }
 
     /**
      * Method called from the GUI when selecting the "Position heatmap" checkbox in the "Analyze" tab.
@@ -58,7 +44,7 @@ public class PositionHeatmapManager : MonoBehaviour
      */
     public void TogglePositionHeatmap(bool show)
     {
-        _heatmapPlane.SetActive(show);
+        heatmapProjectionPlane.SetActive(show);
 
         if (show)
         {
@@ -74,7 +60,7 @@ public class PositionHeatmapManager : MonoBehaviour
     public void SetTransparency(float transparency)
     {
         _transparency = transparency;
-        _heatmapPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
+        heatmapProjectionPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
     }
 
     public void ExportRawData()
@@ -115,13 +101,25 @@ public class PositionHeatmapManager : MonoBehaviour
      */
     private void ComputeAndApplyHeatmap()
     {
-        var positions = LoadRecordPositions();
-        var heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, _heatmapPlane);
-        var heatmapMaterial = new Material(_heatmapMaterial)
+        EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+
+        try
         {
-            mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
-        };
-        _heatmapPlane.GetComponent<Renderer>().material = heatmapMaterial;
+            var positions = LoadRecordPositions();
+            var heatmapTexture =
+                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, heatmapProjectionPlane);
+            var heatmapMaterial = new Material(_heatmapMaterial)
+            {
+                mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
+            };
+            heatmapProjectionPlane.GetComponent<Renderer>().material = heatmapMaterial;
+        }
+        catch (InvalidOperationException ex)
+        {
+            Debug.LogError(ex);
+        }
+        
+        EditorUtility.ClearProgressBar();
     }
     
     /**
@@ -140,8 +138,7 @@ public class PositionHeatmapManager : MonoBehaviour
 
         if (_replayManager.objectsData == null || _replayManager.objectsData.Count == 0)
         {
-            Debug.LogError("Can't compute position heatmap without recordings");
-            return positions;
+            throw new InvalidOperationException("Can't compute position heatmap without recordings");
         }
 
         var logs = _replayManager.objectsData[0];
