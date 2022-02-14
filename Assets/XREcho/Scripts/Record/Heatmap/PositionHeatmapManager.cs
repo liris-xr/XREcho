@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class PositionHeatmapManager : MonoBehaviour
 {
     private static PositionHeatmapManager _instance;
+
+    private float _transparency = 1f;
     
     private GameObject _heatmapPlane;
     private ReplayManager _replayManager;
+    private RecordingManager _recordingManager;
+    private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
 
     private Material _heatmapMaterial;
@@ -25,6 +32,8 @@ public class PositionHeatmapManager : MonoBehaviour
     private void Start()
     {
         _replayManager = ReplayManager.GetInstance();
+        _recordingManager = RecordingManager.GetInstance();
+        _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
     
@@ -61,6 +70,42 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         ComputeAndApplyHeatmap();
     }
+
+    public void SetTransparency(float transparency)
+    {
+        _transparency = transparency;
+        _heatmapPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
+    }
+
+    public void ExportRawData()
+    {
+        var path = Path.Combine(_config.GetExpeRecorderPath(), "Heatmaps");
+        path = Path.Combine(path, _config.project);
+        path = Path.Combine(path, _config.session);
+        Utils.CreateDirectoryIfNotExists(path);
+        
+        var filename = "position_heatmap_" + DateTime.Now.ToString(_config.dateFormat);
+        path = path + '/' + filename + ".csv";
+
+        var rawHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedRawHeatmap());
+        var gaussianHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedGaussianHeatmap());
+
+        Debug.Assert(rawHeatmap.GetLength(0) == gaussianHeatmap.GetLength(0));
+        Debug.Assert(rawHeatmap.GetLength(1) == gaussianHeatmap.GetLength(1));
+        
+        var csvWriter = new CSVWriter(path);
+        csvWriter.WriteLine("gridX", "gridY", "Normalized raw value", "Normalized gaussian value");
+        
+        for (var y = 0; y < rawHeatmap.GetLength(0); y++)
+        {
+            for (var x = 0; x < rawHeatmap.GetLength(1); x++)
+            {
+                csvWriter.WriteLine(x, y, rawHeatmap[y, x], gaussianHeatmap[y, x]);
+            }
+        }
+
+        csvWriter.Close();
+    }
     
     /**
      * - Fetch the positions from the record save
@@ -74,9 +119,19 @@ public class PositionHeatmapManager : MonoBehaviour
         var heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, _heatmapPlane);
         var heatmapMaterial = new Material(_heatmapMaterial)
         {
-            mainTexture = heatmapTexture, mainTextureScale = Vector2.one
+            mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
         };
         _heatmapPlane.GetComponent<Renderer>().material = heatmapMaterial;
+    }
+    
+    /**
+     * Return the duration associated with the hottest point of the heatmap (in seconds).
+     * This is useful for interpreting the scale of the heatmap, the hottest point is where the player stayed the longest.
+     */
+    public float GetMaxDurationValue()
+    {
+        var max = _positionHeatmapProvider.GetCachedRawHeatmap().Cast<float>().Max();
+        return max * 1000 / _recordingManager.trackingRateHz;
     }
     
     private IEnumerable<Vector3> LoadRecordPositions()
