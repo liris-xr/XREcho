@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(XREchoConfig))]
 public class XREcho : MonoBehaviour
 {
@@ -18,8 +20,7 @@ public class XREcho : MonoBehaviour
     public bool displayGUI = true;
     public Camera monitoringCamera;
     public bool dontDestroyOnLoad = false;
-    public float trajectoryHeatmapResolution = 1.0f;
-
+    
     public static XREcho GetInstance()
     {
         return instance;
