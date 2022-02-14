@@ -13,7 +13,6 @@ public class XREchoEditor : Editor
     SerializedProperty displayGUI;
     SerializedProperty monitoringCamera;
     SerializedProperty dontDestroyOnLoad;
-    SerializedProperty trajectoryHeatmapResolution;
 
     private bool isCheckGroup;
     private bool allIsOk;
@@ -26,7 +25,6 @@ public class XREchoEditor : Editor
         displayGUI = serializedObject.FindProperty("displayGUI");
         monitoringCamera = serializedObject.FindProperty("monitoringCamera");
         dontDestroyOnLoad = serializedObject.FindProperty("dontDestroyOnLoad");
-        trajectoryHeatmapResolution = serializedObject.FindProperty("trajectoryHeatmapResolution");
 
         isCheckGroup = true;
         allIsOk = false;
@@ -96,7 +94,6 @@ public class XREchoEditor : Editor
         }
 
         EditorGUILayout.PropertyField(dontDestroyOnLoad);
-        EditorGUILayout.PropertyField(trajectoryHeatmapResolution);
 
         serializedObject.ApplyModifiedProperties();
     }
