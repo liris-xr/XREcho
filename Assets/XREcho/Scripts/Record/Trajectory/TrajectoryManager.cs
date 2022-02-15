@@ -3,6 +3,7 @@
 public class TrajectoryManager : MonoBehaviour
 {
     
+    private MaterialManager _materialManager;
     private static TrajectoryManager _instance;
     private IRecordDataProvider _recordDataProvider;
 
@@ -18,6 +19,12 @@ public class TrajectoryManager : MonoBehaviour
             Debug.LogError("2 trajectory manager: singleton design pattern broken");
 
         _instance = this;
+    }
+    
+    private void Start()
+    {
+        _materialManager = MaterialManager.GetInstance();
+        _lineRenderer.material = _materialManager.GetMaterial("trajectory");
     }
     
     public void ToggleTrajectory(bool show)

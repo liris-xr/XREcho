@@ -2106,6 +2106,8 @@ MonoBehaviour:
     mat: {fileID: 2100000, guid: c73f9237756c6d74ea5efd46940c2fe4, type: 2}
   - name: heatmap
     mat: {fileID: 2100000, guid: f525de63b8f97ad4a8b971efaa493896, type: 2}
+  - name: trajectory
+    mat: {fileID: 2100000, guid: 8cc242a0f77d7ea4b904b7f1806b2a67, type: 2}
   URPMaterials:
   - name: gaze
     mat: {fileID: 2100000, guid: f87d0a2e045aba84c94807d13214e8c8, type: 2}
@@ -2121,6 +2123,8 @@ MonoBehaviour:
     mat: {fileID: 2100000, guid: 6094b26aedf4d814bac8f62381caa319, type: 2}
   - name: heatmap
     mat: {fileID: 2100000, guid: 66b3741107d4d524d87d6bb941dc423e, type: 2}
+  - name: trajectory
+    mat: {fileID: 2100000, guid: c96b351666156a642bb3d2e3150673fe, type: 2}
 --- !u!1 &5569275799210359945
 GameObject:
   m_ObjectHideFlags: 0
