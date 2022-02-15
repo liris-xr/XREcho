@@ -30,7 +30,6 @@ public class GUIManager : MonoBehaviour
     private LogToGUI logger;
     private RecordingManager recordingManager;
     private ReplayManager replayManager;
-    private TrajectoryManager trajectoryManager;
     
     // general variables
     private bool recording;
@@ -69,10 +68,9 @@ public class GUIManager : MonoBehaviour
 
     // Analyze variables
     private bool displaySceneTHM;
-    private bool displayTrajectories;
-    private bool displayControlPoints;
 
     private GUIHeatmap _guiHeatmap;
+    private GUITrajectory _guiTrajectory;
 
     private void Start()
     {
@@ -81,10 +79,11 @@ public class GUIManager : MonoBehaviour
         stylesManager = GetComponent<GUIStylesManager>();
         recordingManager = RecordingManager.GetInstance();
         replayManager = ReplayManager.GetInstance();
-        trajectoryManager = TrajectoryManager.GetInstance();
+        // _trajectoryManagerOld = TrajectoryManagerOld.GetInstance();
 
         _guiHeatmap = new GUIHeatmap(PositionHeatmapManager.GetInstance(), stylesManager);
-
+        _guiTrajectory = new GUITrajectory(TrajectoryManager.GetInstance(), stylesManager);
+        
         OnValidate();
         project = config.project;
         session = config.session;
@@ -106,8 +105,6 @@ public class GUIManager : MonoBehaviour
         replayRecord = "";
 
         displaySceneTHM = false;
-        displayTrajectories = trajectoryManager.showTrajectories;
-        displayControlPoints = trajectoryManager.showControlPoints;
 
         if (xrEcho.autoExecution == XREcho.AutoMode.AutoStartReplay)
         {
@@ -133,8 +130,6 @@ public class GUIManager : MonoBehaviour
             root = Path.Combine(root, replaySession);
             int recId = replayRecordDropdown.SelectedId;
             replayManager.ReadRecording(root, recId);
-            trajectoryManager.SetShowTrajectories(displayTrajectories);
-            trajectoryManager.SetShowControlPoints(displayControlPoints);
             ActivateGazeVisu();
             if (autoRead)
             {
@@ -162,8 +157,6 @@ public class GUIManager : MonoBehaviour
             replaying = replayManager.IsReplaying();
             paused = replayManager.IsPaused();
         }
-        displayTrajectories = trajectoryManager.showTrajectories;
-        displayControlPoints = trajectoryManager.showControlPoints;
         
         GUILayout.BeginArea(new Rect(leftOffset, upOffset, guiWidth, guiHeight));
         GUILayout.BeginVertical(stylesManager.boxStyle);
@@ -238,7 +231,7 @@ public class GUIManager : MonoBehaviour
         if (currentTabHasChanged)
         {
             SetCurrentCamera(false);
-            trajectoryManager.HidePreviousTrajectoriesForRecordMode();
+            _guiTrajectory.ShowTrajectory(false);
         }
 
         newProject = stylesManager.LabeledTextField(" Project:  ", newProject);
@@ -310,7 +303,6 @@ public class GUIManager : MonoBehaviour
         if (currentTabHasChanged)
         {
             SetCurrentCamera(true);
-            trajectoryManager.CheckVisibilities();
 
             replayProjectDropdown = new CustomGUIDropdown(Utils.GetSubfolders(root));
             if (!replayProjectDropdown.SetSelectedEntry(project))
@@ -473,32 +465,11 @@ public class GUIManager : MonoBehaviour
         if (currentTabHasChanged)
         {
             SetCurrentCamera(true);
-            trajectoryManager.CheckVisibilities();
         }
 
-        bool newTraj = GUILayout.Toggle(displayTrajectories, " Trajectories (Recorded & Replayed)", stylesManager.toggleStyle);
-        if (newTraj != displayTrajectories)
-        {
-            displayTrajectories = newTraj;
-            trajectoryManager.SetShowTrajectories(displayTrajectories);
-        }
-
-        if (!displayTrajectories) GUI.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(17);
-        bool newCtrl = GUILayout.Toggle(displayControlPoints, " + Control Points", stylesManager.toggleStyle);
-        GUILayout.EndHorizontal();
-        if (!displayTrajectories)
-        {
-            newCtrl = false;
-            GUI.color = Color.white;
-        }
-        if (newCtrl != displayControlPoints)
-        {
-            displayControlPoints = newCtrl;
-            trajectoryManager.SetShowControlPoints(displayControlPoints);
-        }
-
+        // Display trajectory GUI section (Cf. GUITrajectory)
+        _guiTrajectory.OnGui();
+        
         // Display heatmap GUI section (Cf. GUIHeatmap)
         _guiHeatmap.OnGui();
 

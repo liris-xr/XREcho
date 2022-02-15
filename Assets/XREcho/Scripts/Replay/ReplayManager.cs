@@ -73,7 +73,7 @@ public class ReplayManager : MonoBehaviour
     private bool replayingOnSceneUnloaded;
 
     private XREchoConfig config;
-    private TrajectoryManager trajectoryManager;
+    private TrajectoryManagerOld _trajectoryManagerOld;
     private RecordingManager recordingManager;
     private System.Diagnostics.Stopwatch stopWatch;
 
@@ -91,7 +91,7 @@ public class ReplayManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
-        trajectoryManager = TrajectoryManager.GetInstance();
+        _trajectoryManagerOld = TrajectoryManagerOld.GetInstance();
         recordingManager = RecordingManager.GetInstance();
         config = XREchoConfig.GetInstance();
         
@@ -183,7 +183,7 @@ public class ReplayManager : MonoBehaviour
         events = new List<List<string>>();
 
         clones = new List<List<GameObject>>();
-        if (trajectoryManager != null) trajectoryManager.InitTrajectories();
+        if (_trajectoryManagerOld != null) _trajectoryManagerOld.InitTrajectories();
     }
 
     public void ChangeCamera()
@@ -703,7 +703,7 @@ public class ReplayManager : MonoBehaviour
             totalReplayTime = Mathf.Max(totalReplayTime, totalReplayTimeOfObjects);
         }
 
-        if (trajectoryManager == null)
+        if (_trajectoryManagerOld == null)
             return;
 
         float threshold = 0;
@@ -728,14 +728,14 @@ public class ReplayManager : MonoBehaviour
 
                     if (!firstFrame && controlPoints.Count == 0)
                         controlPoints.Add(position);
-                    else if (Vector3.Distance(position, controlPoints[controlPoints.Count - 1]) > trajectoryManager.minDistanceInterval)
+                    else if (Vector3.Distance(position, controlPoints[controlPoints.Count - 1]) > _trajectoryManagerOld.minDistanceInterval)
                         controlPoints.Add(position);
 
                     while (timestamp >= threshold)
-                        threshold += trajectoryManager.minTimeInterval;
+                        threshold += _trajectoryManagerOld.minTimeInterval;
                 }
             }
-        trajectoryManager.NewTrajectory(controlPoints);
+        _trajectoryManagerOld.NewTrajectory(controlPoints);
     }
 
     private void LoadEventsData(string dataFilepath)

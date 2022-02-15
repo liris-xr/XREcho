@@ -102,7 +102,7 @@ public class XREchoEditor : Editor
     {
         bool allOK = true;
         allOK &= CheckNeededSingleton(typeof(RecordingManager));
-        allOK &= CheckNeededSingleton(typeof(TrajectoryManager));
+        allOK &= CheckNeededSingleton(typeof(TrajectoryManagerOld));
         allOK &= CheckNeededSingleton(typeof(MaterialManager));
         replayIsPossible = CheckNeededSingleton(typeof(ReplayManager), "All replay and analyze features will be disabled", false);
         //if (CheckNeededSingleton(typeof(ReplayManager), "All replay and analyze features will be disabled", false))

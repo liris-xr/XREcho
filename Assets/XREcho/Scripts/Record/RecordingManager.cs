@@ -103,7 +103,7 @@ public class RecordingManager : MonoBehaviour
     // This code is used to display the trajectory while recording which can be useful to debug trajectories
     public bool showControlPointsWhileRecording = false;
 
-    private TrajectoryManager trajectoryManager;
+    private TrajectoryManagerOld _trajectoryManagerOld;
     private int trajectoryIndex;
     private List<Vector3> controlPoints;
     private Vector3 lastControlPoint;
@@ -126,7 +126,7 @@ public class RecordingManager : MonoBehaviour
         keepRecordingOnNewScene = XREcho.GetInstance().dontDestroyOnLoad;
         recordingOnSceneUnloaded = false;
 
-        trajectoryManager = TrajectoryManager.GetInstance();
+        _trajectoryManagerOld = TrajectoryManagerOld.GetInstance();
         config = XREchoConfig.GetInstance();
 
         NewScene(SceneManager.GetActiveScene().name);
@@ -422,7 +422,7 @@ public class RecordingManager : MonoBehaviour
         events = new List<string>();
         eventToId = new Dictionary<string, int>();
         
-        trajectoryIndex = trajectoryManager.NewTrajectory();
+        trajectoryIndex = _trajectoryManagerOld.NewTrajectory();
         ResetTimers();
 
         if (!ExportFormat())
@@ -512,7 +512,7 @@ public class RecordingManager : MonoBehaviour
     private void ResetTimers()
     {
         timeSinceStartOfRecording = 0;
-        timeSinceLastControlPoint = trajectoryManager.minTimeInterval;
+        timeSinceLastControlPoint = _trajectoryManagerOld.minTimeInterval;
 
         foreach (TrackedObject to in trackedObjects)
             to.timeSinceLastWrite = to.trackingInterval;
@@ -567,9 +567,9 @@ public class RecordingManager : MonoBehaviour
 
             if (showControlPointsWhileRecording && i == 0)
             {
-                if (timeSinceLastControlPoint >= trajectoryManager.minTimeInterval)
+                if (timeSinceLastControlPoint >= _trajectoryManagerOld.minTimeInterval)
                 {
-                    if (Vector3.Distance(to.obj.transform.position, lastControlPoint) > trajectoryManager.minDistanceInterval)
+                    if (Vector3.Distance(to.obj.transform.position, lastControlPoint) > _trajectoryManagerOld.minDistanceInterval)
                         NewControlPoint(to.obj.transform.position);
                 }
             }
@@ -681,7 +681,7 @@ public class RecordingManager : MonoBehaviour
     {
         timeSinceLastControlPoint = 0;
         lastControlPoint = position;
-        trajectoryManager.AddControlPoint(trajectoryIndex, position);
+        _trajectoryManagerOld.AddControlPoint(trajectoryIndex, position);
     }
 
     private void WriteHeaders()
