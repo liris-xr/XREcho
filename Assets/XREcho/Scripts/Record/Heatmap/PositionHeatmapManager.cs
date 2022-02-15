@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class PositionHeatmapManager : MonoBehaviour
 {
@@ -12,9 +12,10 @@ public class PositionHeatmapManager : MonoBehaviour
     private static PositionHeatmapManager _instance;
 
     private float _transparency = 1f;
+    private float _scaleLowerBound;
+    private float _scaleUpperBound = 1f;
     
     private ReplayManager _replayManager;
-    private RecordingManager _recordingManager;
     private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
 
@@ -33,7 +34,6 @@ public class PositionHeatmapManager : MonoBehaviour
     private void Start()
     {
         _replayManager = ReplayManager.GetInstance();
-        _recordingManager = RecordingManager.GetInstance();
         _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
@@ -62,6 +62,13 @@ public class PositionHeatmapManager : MonoBehaviour
         _transparency = transparency;
         heatmapProjectionPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
     }
+    
+    public void SetScaleBounds(float heatmapScaleLowerBound, float heatmapScaleUpperBound)
+    {
+        _scaleLowerBound = heatmapScaleLowerBound;
+        _scaleUpperBound = heatmapScaleUpperBound;
+        // ComputeAndApplyHeatmap();
+    }
 
     public void ExportRawData()
     {
@@ -73,20 +80,22 @@ public class PositionHeatmapManager : MonoBehaviour
         var filename = "position_heatmap_" + DateTime.Now.ToString(_config.dateFormat);
         path = path + '/' + filename + ".csv";
 
-        var rawHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedRawHeatmap());
-        var gaussianHeatmap = PositionHeatmapProvider.NormalizeHeatmap(_positionHeatmapProvider.GetCachedGaussianHeatmap());
+        var rawHeatmap = _positionHeatmapProvider.GetRawHeatmap();
+        var gaussianHeatmap = _positionHeatmapProvider.GetGaussianHeatmap();
+        var normalizedRawHeatmap = PositionHeatmapProvider.NormalizeHeatmap(rawHeatmap, 0, rawHeatmap.Cast<float>().Max());
+        var normalizedGaussianHeatmap = PositionHeatmapProvider.NormalizeHeatmap(gaussianHeatmap, 0, gaussianHeatmap.Cast<float>().Max());
 
         Debug.Assert(rawHeatmap.GetLength(0) == gaussianHeatmap.GetLength(0));
         Debug.Assert(rawHeatmap.GetLength(1) == gaussianHeatmap.GetLength(1));
         
         var csvWriter = new CSVWriter(path);
-        csvWriter.WriteLine("gridX", "gridY", "Normalized raw value", "Normalized gaussian value");
+        csvWriter.WriteLine("gridX", "gridY", "Raw value (s)", "Gaussian heatmap value (s)", "Normalized value", "Normalized Gaussian value");
         
         for (var y = 0; y < rawHeatmap.GetLength(0); y++)
         {
             for (var x = 0; x < rawHeatmap.GetLength(1); x++)
             {
-                csvWriter.WriteLine(x, y, rawHeatmap[y, x], gaussianHeatmap[y, x]);
+                csvWriter.WriteLine(x, y, rawHeatmap[y, x], gaussianHeatmap[y, x], normalizedRawHeatmap[y, x], normalizedGaussianHeatmap[y, x]);
             }
         }
 
@@ -101,13 +110,12 @@ public class PositionHeatmapManager : MonoBehaviour
      */
     private void ComputeAndApplyHeatmap()
     {
-        EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
-
         try
         {
-            var positions = LoadRecordPositions();
+            LoadRecordPositionsAndTimestamps(out var positions, out var timestamps);
+
             var heatmapTexture =
-                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, heatmapProjectionPlane);
+                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, _scaleLowerBound, _scaleUpperBound, _replayManager.GetTotalReplayTime(), heatmapProjectionPlane);
             var heatmapMaterial = new Material(_heatmapMaterial)
             {
                 mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
@@ -118,27 +126,25 @@ public class PositionHeatmapManager : MonoBehaviour
         {
             Debug.LogError(ex);
         }
-        
-        EditorUtility.ClearProgressBar();
     }
     
     /**
      * Return the duration associated with the hottest point of the heatmap (in seconds).
      * This is useful for interpreting the scale of the heatmap, the hottest point is where the player stayed the longest.
      */
-    public float GetMaxDurationValue()
+    public float GetMaxDuration()
     {
-        var max = _positionHeatmapProvider.GetCachedRawHeatmap().Cast<float>().Max();
-        return max * 1000 / _recordingManager.trackingRateHz;
+        return _positionHeatmapProvider.GetMaxDuration();
     }
     
-    private IEnumerable<Vector3> LoadRecordPositions()
+    private void LoadRecordPositionsAndTimestamps(out List<Vector3> positions, out List<float> timestamps)
     {
-        var positions = new List<Vector3>();
-
+        positions = new List<Vector3>();
+        timestamps = new List<float>();
+        
         if (_replayManager.objectsData == null || _replayManager.objectsData.Count == 0)
         {
-            throw new InvalidOperationException("Can't compute position heatmap without recordings");
+            throw new InvalidOperationException("Can't compute position heatmap without recordings or if recording is empty");
         }
 
         var logs = _replayManager.objectsData[0];
@@ -148,14 +154,14 @@ public class PositionHeatmapManager : MonoBehaviour
             if ((int)(float)entry["actionId"] == (int) ActionType.POSITION)
             {
                 positions.Add(ReplayManager.LoadPosition(entry));
+                timestamps.Add((float) entry["timestamp"]);
             }
         }
-
-        return positions;
     }
     
     public static PositionHeatmapManager GetInstance()
     {
         return _instance;
     }
+
 }

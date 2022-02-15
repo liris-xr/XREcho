@@ -1,4 +1,7 @@
-﻿﻿public class Gaussian
+﻿﻿using System.Diagnostics;
+ using Debug = UnityEngine.Debug;
+
+ public class Gaussian
 {
     private readonly float[,] _coefficients;
     private readonly int _diameter;
@@ -9,6 +12,7 @@
         _diameter = diameter;
     }
     
+    // TODO: Use Compute Shaders to make this run faster (takes approximately 95% of the exec time on the generation of a heatmap)
     public float[,] Apply(float[,] grid)
     {
         var gridHeight = grid.GetLength(0);

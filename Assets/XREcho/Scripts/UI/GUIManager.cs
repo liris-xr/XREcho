@@ -2,7 +2,11 @@ using System;
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Threading;
+using UnityEditor;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(GUIStylesManager))]
 [RequireComponent(typeof(LogToGUI))]
@@ -65,13 +69,11 @@ public class GUIManager : MonoBehaviour
 
     // Analyze variables
     private bool displaySceneTHM;
-    private bool displayPositionHeatmap;
     private bool displayTrajectories;
     private bool displayControlPoints;
-    private PositionHeatmapManager positionHeatmapManager;
 
-    private float lastPositionHeatmapTransparency = 1f;
-    
+    private GUIHeatmap _guiHeatmap;
+
     private void Start()
     {
         xrEcho = XREcho.GetInstance();
@@ -80,7 +82,8 @@ public class GUIManager : MonoBehaviour
         recordingManager = RecordingManager.GetInstance();
         replayManager = ReplayManager.GetInstance();
         trajectoryManager = TrajectoryManager.GetInstance();
-        positionHeatmapManager = PositionHeatmapManager.GetInstance();
+
+        _guiHeatmap = new GUIHeatmap(PositionHeatmapManager.GetInstance(), stylesManager);
 
         OnValidate();
         project = config.project;
@@ -103,7 +106,6 @@ public class GUIManager : MonoBehaviour
         replayRecord = "";
 
         displaySceneTHM = false;
-        displayPositionHeatmap = false;
         displayTrajectories = trajectoryManager.showTrajectories;
         displayControlPoints = trajectoryManager.showControlPoints;
 
@@ -374,7 +376,7 @@ public class GUIManager : MonoBehaviour
 
     private void ReaderGUI(float recordDuration)
     {
-        int[] fastforwardModes = { 1, 2, 8 };
+        int[] fastforwardModes = {1, 2, 8};
 
         bool isEmpty = recordDuration < 0.1f;
         float duration = Math.Max(recordDuration, 0.1f);
@@ -389,11 +391,15 @@ public class GUIManager : MonoBehaviour
             replayManager.JumpForwardBy(newSliderValue - readerSliderValue);
             readerSliderValue = newSliderValue;
         }
+
         if (!isEmpty) GUI.color = Color.white;
 
         GUILayout.BeginHorizontal();
-        
-        if ((GUILayout.Button(!replaying || paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, isEmpty ? stylesManager.blockedImageButtonStyle : stylesManager.imageButtonStyle) || ShortcutIsPressed(replayManager.playPauseShortcut)) && !isEmpty)
+
+        if ((GUILayout.Button(
+                 !replaying || paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture,
+                 isEmpty ? stylesManager.blockedImageButtonStyle : stylesManager.imageButtonStyle) ||
+             ShortcutIsPressed(replayManager.playPauseShortcut)) && !isEmpty)
         {
             if (!replaying || paused) currentBlinkingAlpha = 1;
             if (!replaying)
@@ -411,35 +417,45 @@ public class GUIManager : MonoBehaviour
                 {
                     replayManager.JumpForwardBy(-duration);
                 }
+
                 replayManager.TogglePause();
             }
         }
 
         if (!replaying) GUI.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
-        if ((GUILayout.Button(stylesManager.stopSprite.texture, replaying ? stylesManager.imageButtonStyle : stylesManager.blockedImageButtonStyle) || ShortcutIsPressed(replayManager.stopShortcut)) && replaying)
+        if ((GUILayout.Button(stylesManager.stopSprite.texture,
+                 replaying ? stylesManager.imageButtonStyle : stylesManager.blockedImageButtonStyle) ||
+             ShortcutIsPressed(replayManager.stopShortcut)) && replaying)
         {
             if (displayCameraView)
             {
                 replayManager.ChangeCamera();
             }
+
             replayManager.StopReplaying();
             readerSliderValue = 0;
         }
+
         if (!isEmpty) GUI.color = Color.white;
 
-        string lab = isEmpty ? "0:00 / 0:00" : Utils.TimeString((int)readerSliderValue) + " / " + Utils.TimeString((int)Math.Round(duration));
+        string lab = isEmpty
+            ? "0:00 / 0:00"
+            : Utils.TimeString((int) readerSliderValue) + " / " + Utils.TimeString((int) Math.Round(duration));
         GUILayout.Label(lab, stylesManager.bigLabelStyle);
         GUILayout.FlexibleSpace();
 
         GUI.color = Color.white;
 
-        if (GUILayout.Button(new GUIContent("" + fastforwardModes[nextFFMode], stylesManager.forwardSprite.texture), stylesManager.imageButtonStyle))
+        if (GUILayout.Button(new GUIContent("" + fastforwardModes[nextFFMode], stylesManager.forwardSprite.texture),
+                stylesManager.imageButtonStyle))
         {
             nextFFMode = (nextFFMode + 1) % fastforwardModes.Length;
             replayManager.FastForward(fastforwardModes[nextFFMode]);
         }
 
-        if (GUILayout.Button(!displayCameraView ? stylesManager.topviewSprite.texture : stylesManager.cameraSprite.texture, stylesManager.imageButtonStyle))
+        if (GUILayout.Button(
+                !displayCameraView ? stylesManager.topviewSprite.texture : stylesManager.cameraSprite.texture,
+                stylesManager.imageButtonStyle))
         {
             displayCameraView = !displayCameraView;
             if (replaying)
@@ -451,7 +467,6 @@ public class GUIManager : MonoBehaviour
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();
     }
-
 
     private void AnalyzeGUI()
     {
@@ -484,41 +499,8 @@ public class GUIManager : MonoBehaviour
             trajectoryManager.SetShowControlPoints(displayControlPoints);
         }
 
-        var showPositionHeatmap = GUILayout.Toggle(displayPositionHeatmap, "Position heatmap", stylesManager.toggleStyle);
-        if (showPositionHeatmap != displayPositionHeatmap)
-        {
-            displayPositionHeatmap = showPositionHeatmap;
-            positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
-        }
-
-        if (showPositionHeatmap)
-        {
-            GUILayout.BeginVertical("box");
-            
-            GUILayout.Label($"Min duration: 0s");
-            GUILayout.Label($"Max duration: {positionHeatmapManager.GetMaxDurationValue()}s");
-
-            GUILayout.Label("Heatmap transparency");
-            var transparencyValue = GUILayout.HorizontalSlider(lastPositionHeatmapTransparency, 0f, 1f);
-
-            if (Math.Abs(lastPositionHeatmapTransparency - transparencyValue) > 10e-6)
-            {
-                positionHeatmapManager.SetTransparency(transparencyValue);
-                lastPositionHeatmapTransparency = transparencyValue;
-            }
-
-            if (GUILayout.Button("Force re-generate heatmap"))
-            {
-                positionHeatmapManager.ForceRegenerate();
-            }
-            
-            if (GUILayout.Button("Export raw data"))
-            {
-                positionHeatmapManager.ExportRawData();
-            }
-            
-            GUILayout.EndVertical();
-        }
+        // Display heatmap GUI section (Cf. GUIHeatmap)
+        _guiHeatmap.OnGui();
 
         if (GUILayout.Button(new GUIContent(" Take Screenshot", stylesManager.screenshotSprite.texture), stylesManager.screenshotButtonStyle))
         {
