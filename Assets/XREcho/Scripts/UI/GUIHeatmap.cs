@@ -37,7 +37,7 @@ public class GUIHeatmap
             if (showPositionHeatmap)
             {
                 _heatmapScaleLowerBoundStr = "0";
-                _heatmapScaleUpperBoundStr = _positionHeatmapManager.GetMaxDuration().ToString(CultureInfo.CurrentCulture);
+                _heatmapScaleUpperBoundStr = $"{_positionHeatmapManager.GetMaxDuration():0.###}";
             }
         }
 
@@ -57,8 +57,8 @@ public class GUIHeatmap
             var heatmapScaleLowerBoundStyle = new GUIStyle(GUI.skin.textField);
             var heatmapScaleUpperBoundStyle = new GUIStyle(GUI.skin.textField);
             
-            var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) && heatmapScaleLowerBound <= _positionHeatmapManager.GetMaxDuration();
-            var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound) && heatmapScaleUpperBound <= _positionHeatmapManager.GetMaxDuration() && heatmapScaleUpperBound > heatmapScaleLowerBound;
+            var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) && Math.Abs(heatmapScaleLowerBound) <= 10e-3;
+            var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound) && Math.Abs(heatmapScaleUpperBound - _positionHeatmapManager.GetMaxDuration()) <= 10e-3 && heatmapScaleUpperBound > heatmapScaleLowerBound;
 
             heatmapScaleLowerBoundStyle.normal.textColor = lowerBoundValid ? Color.white : Color.red;
             heatmapScaleUpperBoundStyle.normal.textColor = upperBoundValid ? Color.white : Color.red;
@@ -93,7 +93,7 @@ public class GUIHeatmap
 
             if (setUpperScaleToMax)
             {
-                _heatmapScaleUpperBoundStr = _positionHeatmapManager.GetMaxDuration().ToString(CultureInfo.CurrentCulture);
+                _heatmapScaleUpperBoundStr = $"{_positionHeatmapManager.GetMaxDuration():0.###}";
             }
 
             if (lowerBoundValid && upperBoundValid)
