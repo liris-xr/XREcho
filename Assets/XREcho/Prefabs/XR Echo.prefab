@@ -174,6 +174,54 @@ MonoBehaviour:
     lastRotation: {x: 0, y: 0, z: 0}
     replayGameObject: {fileID: 0}
     replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Origin/Camera Offset/LeftHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Origin/Camera Offset/RightHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (2)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (1)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
   recordShortcut: 114
   showControlPointsWhileRecording: 0
 --- !u!1 &662750848313395463
@@ -1674,6 +1722,8 @@ GameObject:
   - component: {fileID: 4620742586810499730}
   - component: {fileID: 7161200430879619566}
   - component: {fileID: 1435522182967012831}
+  - component: {fileID: 5160721305865499359}
+  - component: {fileID: 897628777085341621}
   m_Layer: 0
   m_Name: PositionHeatmapManager
   m_TagString: Untagged
@@ -1776,6 +1826,30 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
+--- !u!114 &5160721305865499359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2998070531003240436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c8a66ce55064a0bb31f1e1e979a353d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &897628777085341621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2998070531003240436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545cae1435314fbb8537a406c3c09e83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3654482642258894578
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,15 +15,18 @@ public class PositionHeatmapManager : MonoBehaviour
     private float _scaleLowerBound;
     private float _scaleUpperBound = 1f;
     
-    private ReplayManager _replayManager;
     private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
+    private IRecordDataProvider _recordDataProvider;
+    private IHeatmapWriter _heatmapWriter;
 
     private Material _heatmapMaterial;
 
     private void Awake()
     {
         _positionHeatmapProvider = GetComponent<PositionHeatmapProvider>();
+        _recordDataProvider = GetComponent<IRecordDataProvider>();
+        _heatmapWriter = GetComponent<IHeatmapWriter>();
         
         if (_instance)
             Debug.LogError("2 position heatmap manager: singleton design pattern broken");
@@ -33,7 +36,6 @@ public class PositionHeatmapManager : MonoBehaviour
     
     private void Start()
     {
-        _replayManager = ReplayManager.GetInstance();
         _config = XREchoConfig.GetInstance();
         _heatmapMaterial = MaterialManager.GetInstance().GetMaterial("heatmap");
     }
@@ -70,7 +72,7 @@ public class PositionHeatmapManager : MonoBehaviour
         // ComputeAndApplyHeatmap();
     }
 
-    public void ExportRawData()
+    public void Export()
     {
         var path = Path.Combine(_config.GetExpeRecorderPath(), "Heatmaps");
         path = Path.Combine(path, _config.project);
@@ -78,7 +80,8 @@ public class PositionHeatmapManager : MonoBehaviour
         Utils.CreateDirectoryIfNotExists(path);
         
         var filename = "position_heatmap_" + DateTime.Now.ToString(_config.dateFormat);
-        path = path + '/' + filename + ".csv";
+        var rawHeatmapPath = path + '/' + filename + "_raw.csv";
+        var gaussianHeatmapPath = path + '/' + filename + "_gaussian.csv";
 
         var rawHeatmap = _positionHeatmapProvider.GetRawHeatmap();
         var gaussianHeatmap = _positionHeatmapProvider.GetGaussianHeatmap();
@@ -87,19 +90,10 @@ public class PositionHeatmapManager : MonoBehaviour
 
         Debug.Assert(rawHeatmap.GetLength(0) == gaussianHeatmap.GetLength(0));
         Debug.Assert(rawHeatmap.GetLength(1) == gaussianHeatmap.GetLength(1));
-        
-        var csvWriter = new CSVWriter(path);
-        csvWriter.WriteLine("gridX", "gridY", "Raw value (s)", "Gaussian heatmap value (s)", "Normalized value", "Normalized Gaussian value");
-        
-        for (var y = 0; y < rawHeatmap.GetLength(0); y++)
-        {
-            for (var x = 0; x < rawHeatmap.GetLength(1); x++)
-            {
-                csvWriter.WriteLine(x, y, rawHeatmap[y, x], gaussianHeatmap[y, x], normalizedRawHeatmap[y, x], normalizedGaussianHeatmap[y, x]);
-            }
-        }
 
-        csvWriter.Close();
+        _heatmapWriter.Write(rawHeatmapPath, rawHeatmap, normalizedRawHeatmap);
+        _heatmapWriter.Write(rawHeatmapPath, rawHeatmap, normalizedRawHeatmap);
+        _heatmapWriter.Write(gaussianHeatmapPath, gaussianHeatmap, normalizedGaussianHeatmap);
     }
     
     /**
@@ -112,10 +106,10 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         try
         {
-            LoadRecordPositionsAndTimestamps(out var positions, out var timestamps);
+            _recordDataProvider.LoadRecordData(out var positions, out var timestamps, out var totalRecordTime);
 
             var heatmapTexture =
-                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, _scaleLowerBound, _scaleUpperBound, _replayManager.GetTotalReplayTime(), heatmapProjectionPlane);
+                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, _scaleLowerBound, _scaleUpperBound, totalRecordTime, heatmapProjectionPlane);
             var heatmapMaterial = new Material(_heatmapMaterial)
             {
                 mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
@@ -136,29 +130,7 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         return _positionHeatmapProvider.GetMaxDuration();
     }
-    
-    private void LoadRecordPositionsAndTimestamps(out List<Vector3> positions, out List<float> timestamps)
-    {
-        positions = new List<Vector3>();
-        timestamps = new List<float>();
-        
-        if (_replayManager.objectsData == null || _replayManager.objectsData.Count == 0)
-        {
-            throw new InvalidOperationException("Can't compute position heatmap without recordings or if recording is empty");
-        }
 
-        var logs = _replayManager.objectsData[0];
-
-        foreach (var entry in logs)
-        {
-            if ((int)(float)entry["actionId"] == (int) ActionType.POSITION)
-            {
-                positions.Add(ReplayManager.LoadPosition(entry));
-                timestamps.Add((float) entry["timestamp"]);
-            }
-        }
-    }
-    
     public static PositionHeatmapManager GetInstance()
     {
         return _instance;

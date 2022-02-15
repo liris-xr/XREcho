@@ -120,7 +120,7 @@ public class GUIHeatmap
             
             if (GUILayout.Button("Export raw data"))
             {
-                _positionHeatmapManager.ExportRawData();
+                _positionHeatmapManager.Export();
             }
             
             GUILayout.EndVertical();
