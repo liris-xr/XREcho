@@ -68,7 +68,7 @@ public class GUIManager : MonoBehaviour
 
     // Analyze variables
     private bool displaySceneTHM;
-
+    
     private GUIHeatmap _guiHeatmap;
     private GUITrajectory _guiTrajectory;
 
@@ -116,9 +116,8 @@ public class GUIManager : MonoBehaviour
     private void OnValidate()
     {
         guiHeight = Screen.height - upOffset;
-        int y = 150;
         logger = GetComponent<LogToGUI>();
-        logger.guiRect = new Rect(leftOffset, upOffset + y + 5, guiWidth, guiHeight - y - 10);
+        logger.guiRect = new Rect(leftOffset, upOffset + 5, guiWidth, guiHeight - 10);
     }
 
     private void Update()
@@ -137,6 +136,9 @@ public class GUIManager : MonoBehaviour
                 replayManager.StartReplaying();
             }
             loading = false;
+            
+            _guiTrajectory.OnNewRecordLoaded();
+            _guiHeatmap.OnNewRecordLoaded();
         }
     }
     
@@ -220,7 +222,7 @@ public class GUIManager : MonoBehaviour
         if (Event.current.type == EventType.MouseDown)
         {
             CloseOtherDropdowns(null);
-        }  
+        }
     }
 
     private void RecordGUI()
@@ -295,7 +297,6 @@ public class GUIManager : MonoBehaviour
             }
         }
     }
-
 
     private void ReplayGUI()
     {
