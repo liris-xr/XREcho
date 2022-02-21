@@ -222,6 +222,66 @@ MonoBehaviour:
     lastRotation: {x: 0, y: 0, z: 0}
     replayGameObject: {fileID: 0}
     replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Origin/Camera Offset/LeftHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Origin/Camera Offset/RightHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (2)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (1)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/Plane
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
   recordShortcut: 114
 --- !u!1 &662750848313395463
 GameObject:
@@ -1419,7 +1479,7 @@ MonoBehaviour:
     x: 20
     y: 25
     width: 270
-    height: 927
+    height: 274
 --- !u!114 &7624471816676135667
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2376,14 +2436,13 @@ GameObject:
   - component: {fileID: 3261599179814416673}
   - component: {fileID: 2512096956688514072}
   - component: {fileID: 7568768441120886002}
-  - component: {fileID: 1458152604127705714}
   m_Layer: 0
   m_Name: Heatmap projection plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3261599179814416673
 Transform:
   m_ObjectHideFlags: 0
@@ -2393,7 +2452,7 @@ Transform:
   m_GameObject: {fileID: 7783840861436284418}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.01, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_Children: []
   m_Father: {fileID: 3148109975281738623}
   m_RootOrder: 0
@@ -2447,20 +2506,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &1458152604127705714
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7783840861436284418}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &8040062055422851939
 GameObject:
   m_ObjectHideFlags: 0
