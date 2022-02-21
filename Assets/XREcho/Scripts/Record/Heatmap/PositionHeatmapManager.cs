@@ -14,6 +14,8 @@ public class PositionHeatmapManager : MonoBehaviour
     private float _transparency = 1f;
     private float _scaleLowerBound;
     private float _scaleUpperBound = 1f;
+
+    private bool aggregationMode;
     
     private XREchoConfig _config;
     private PositionHeatmapProvider _positionHeatmapProvider;
@@ -50,10 +52,17 @@ public class PositionHeatmapManager : MonoBehaviour
 
         if (show)
         {
+            aggregationMode = false;
             ComputeAndApplyHeatmap();
         }
     }
 
+    public void ToggleAggregatedPositionHeatmap(bool show)
+    {
+        aggregationMode = show;
+        ComputeAndApplyHeatmap();
+    }
+    
     public void ForceRegenerate()
     {
         ComputeAndApplyHeatmap();
@@ -106,10 +115,19 @@ public class PositionHeatmapManager : MonoBehaviour
     {
         try
         {
-            _recordDataProvider.LoadRecordData(out var positions, out var timestamps, out var totalRecordTime);
-
-            var heatmapTexture =
-                _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, _scaleLowerBound, _scaleUpperBound, totalRecordTime, heatmapProjectionPlane);
+            Texture2D heatmapTexture;
+            
+            if (aggregationMode)
+            {
+                _recordDataProvider.LoadAllProjectRecordsData(out var positions, out var timestamps, out var recordDurations);
+                heatmapTexture = _positionHeatmapProvider.CreateAggregatedPositionHeatmapTexture(positions, timestamps, recordDurations, heatmapProjectionPlane);
+            }
+            else
+            {
+                _recordDataProvider.LoadSelectedRecordData(out var positions, out var timestamps, out var recordDuration);
+                heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, recordDuration, _scaleLowerBound, _scaleUpperBound, heatmapProjectionPlane);
+            }
+            
             var heatmapMaterial = new Material(_heatmapMaterial)
             {
                 mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)

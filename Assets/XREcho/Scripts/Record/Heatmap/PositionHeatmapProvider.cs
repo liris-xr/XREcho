@@ -47,7 +47,9 @@ public class PositionHeatmapProvider : MonoBehaviour
         return normalizedHeatmap;
     }
     
-    private static float[,] CreatePositionHeatmapGrid(int heatmapWidth, int heatmapHeight, float recordTotalDuration, IReadOnlyList<Vector3> positions, IReadOnlyList<float> timestamps, Vector3 planeOrigin, Vector3 planeSize)
+    private static float[,] CreatePositionHeatmapGrid(int heatmapWidth, int heatmapHeight,
+        IReadOnlyList<Vector3> positions, IReadOnlyList<float> timestamps, float recordDuration, Vector3 planeOrigin,
+        Vector3 planeSize)
     {
         Assert.AreEqual(positions.Count, timestamps.Count);
         
@@ -61,7 +63,7 @@ public class PositionHeatmapProvider : MonoBehaviour
             
             if (i == positions.Count - 1)
             {
-                duration = recordTotalDuration - currentTimestamp;
+                duration = recordDuration - currentTimestamp;
             }
             else
             {
@@ -86,14 +88,15 @@ public class PositionHeatmapProvider : MonoBehaviour
         return heatmap;
     }
 
-    public Texture2D CreatePositionHeatmapTexture(IReadOnlyList<Vector3> positions, IReadOnlyList<float> timestamps, float scaleLowerBound, float scaleUpperBound, float recordTotalDuration, GameObject heatmapPlane)
+    public Texture2D CreatePositionHeatmapTexture(IReadOnlyList<Vector3> positions, IReadOnlyList<float> timestamps,
+        float recordDuration, float scaleLowerBound, float scaleUpperBound, GameObject heatmapPlane)
     {
         var bounds = heatmapPlane.GetComponent<Renderer>().bounds;
         var heatmapWidth = Mathf.FloorToInt(pixelsPerMeter * bounds.size.x);
         var heatmapHeight = Mathf.FloorToInt(pixelsPerMeter * bounds.size.z);
 
         var gaussian = _gaussianProvider.CreateGaussian();
-        var posHeatmap = CreatePositionHeatmapGrid(heatmapWidth, heatmapHeight, recordTotalDuration, positions, timestamps, bounds.min, bounds.size);
+        var posHeatmap = CreatePositionHeatmapGrid(heatmapWidth, heatmapHeight, positions, timestamps, recordDuration, bounds.min, bounds.size);
         var posHeatmapGaussian = gaussian.Apply(posHeatmap);
 
         _cachedMaxDuration = posHeatmap.Cast<float>().Max();
@@ -103,6 +106,44 @@ public class PositionHeatmapProvider : MonoBehaviour
         var maxGaussian = posHeatmapGaussian.Cast<float>().Max();
         
         return _heatmapTextureProvider.HeatmapToTexture(NormalizeHeatmap(posHeatmapGaussian, scaleLowerBound * maxGaussian, scaleUpperBound * maxGaussian));
+    }
+
+    public Texture2D CreateAggregatedPositionHeatmapTexture(IReadOnlyList<List<Vector3>> positions, IReadOnlyList<List<float>> timestamps, List<float> recordDurations, GameObject heatmapPlane)
+    {
+        var bounds = heatmapPlane.GetComponent<Renderer>().bounds;
+        var heatmapWidth = Mathf.FloorToInt(pixelsPerMeter * bounds.size.x);
+        var heatmapHeight = Mathf.FloorToInt(pixelsPerMeter * bounds.size.z);
+        var gaussian = _gaussianProvider.CreateGaussian();
+
+        Assert.AreEqual(positions.Count, timestamps.Count);
+        Assert.AreEqual(positions.Count, recordDurations.Count);
+        
+        var nRecords = positions.Count;
+        var aggregatedHeatmap = new float[heatmapHeight, heatmapWidth];
+
+        for (var i = 0; i < nRecords; ++i)
+        {
+            var posHeatmap = CreatePositionHeatmapGrid(heatmapWidth, heatmapHeight, positions[i], timestamps[i], recordDurations[i], bounds.min, bounds.size);
+            // Reuse scale ?
+            var normalizedHeatmap = NormalizeHeatmap(posHeatmap, 0, posHeatmap.Cast<float>().Max());
+
+            for (var x = 0; x < heatmapWidth; x++)
+            {
+                for (var y = 0; y < heatmapHeight; y++)
+                {
+                    aggregatedHeatmap[y, x] += normalizedHeatmap[y, x];
+                }
+            }
+        }
+
+        var aggregatedHeatmapGaussian = gaussian.Apply(aggregatedHeatmap);
+
+        _cachedMaxDuration = -1; // no meaning when normalized
+        _cachedRawHeatmap = aggregatedHeatmap;
+        _cachedGaussianHeatmap = aggregatedHeatmapGaussian;
+        
+        var maxGaussian = aggregatedHeatmapGaussian.Cast<float>().Max();
+        return _heatmapTextureProvider.HeatmapToTexture(NormalizeHeatmap(aggregatedHeatmapGaussian, 0, maxGaussian));
     }
 
     public float GetMaxDuration()
