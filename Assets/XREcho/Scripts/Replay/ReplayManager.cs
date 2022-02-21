@@ -73,7 +73,6 @@ public class ReplayManager : MonoBehaviour
     private bool replayingOnSceneUnloaded;
 
     private XREchoConfig config;
-    private TrajectoryManager trajectoryManager;
     private RecordingManager recordingManager;
     private System.Diagnostics.Stopwatch stopWatch;
 
@@ -91,7 +90,6 @@ public class ReplayManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
-        trajectoryManager = TrajectoryManager.GetInstance();
         recordingManager = RecordingManager.GetInstance();
         config = XREchoConfig.GetInstance();
         
@@ -183,7 +181,6 @@ public class ReplayManager : MonoBehaviour
         events = new List<List<string>>();
 
         clones = new List<List<GameObject>>();
-        if (trajectoryManager != null) trajectoryManager.InitTrajectories();
     }
 
     public void ChangeCamera()
@@ -691,7 +688,7 @@ public class ReplayManager : MonoBehaviour
     }
 
     /*
-     * Reads a datafile and shows the trajectory of the first tracked object
+     * Reads a datafile
      */
     private void LoadObjectsData(string dataFilepath, int recId)
     {
@@ -702,40 +699,6 @@ public class ReplayManager : MonoBehaviour
             float totalReplayTimeOfObjects = (float)data[data.Count - 1]["timestamp"];
             totalReplayTime = Mathf.Max(totalReplayTime, totalReplayTimeOfObjects);
         }
-
-        if (trajectoryManager == null)
-            return;
-
-        float threshold = 0;
-        bool firstFrame = true;
-        List<Vector3> controlPoints = new List<Vector3>();
-        for (int i = 0; i < data.Count; i++)
-            if ((int)(float)data[i]["actionId"] == 0)
-            {
-                if (firstFrame)
-                {
-                    firstFrame = false;
-                    continue;
-                }
-
-                float timestamp = (float)data[i]["timestamp"];
-                if (timestamp >= threshold)
-                {
-                    Vector3 position;
-                    position.x = (float)data[i]["position.x"];
-                    position.y = (float)data[i]["position.y"];
-                    position.z = (float)data[i]["position.z"];
-
-                    if (!firstFrame && controlPoints.Count == 0)
-                        controlPoints.Add(position);
-                    else if (Vector3.Distance(position, controlPoints[controlPoints.Count - 1]) > trajectoryManager.minDistanceInterval)
-                        controlPoints.Add(position);
-
-                    while (timestamp >= threshold)
-                        threshold += trajectoryManager.minTimeInterval;
-                }
-            }
-        trajectoryManager.NewTrajectory(controlPoints);
     }
 
     private void LoadEventsData(string dataFilepath)

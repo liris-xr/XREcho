@@ -62,7 +62,7 @@ public class RecordDataProvider : MonoBehaviour, IRecordDataProvider
         
         if (_replayManager.objectsData == null || _replayManager.objectsData.Count == 0)
         {
-            throw new InvalidOperationException("Can't compute position heatmap without recordings or if recording is empty");
+            throw new InvalidOperationException("No recording loaded");
         }
 
         var data = _replayManager.objectsData[0];

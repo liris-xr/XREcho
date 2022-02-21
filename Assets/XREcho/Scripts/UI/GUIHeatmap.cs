@@ -21,7 +21,20 @@ public class GUIHeatmap
         _stylesManager = stylesManager;
         _positionHeatmapManager = positionHeatmapManager;
     }
-    
+
+    public void OnNewRecordLoaded()
+    {
+        if (_displayHeatmap)
+        {
+            EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+            _positionHeatmapManager.SetScaleBounds(0f, 1f);
+            _positionHeatmapManager.ForceRegenerate();
+            _heatmapScaleLowerBoundStr = "0";
+            _heatmapScaleUpperBoundStr = $"{_positionHeatmapManager.GetMaxDuration():0.###}";
+            EditorUtility.ClearProgressBar();
+        }
+    }
+
     public void OnGui()
     {
         var showPositionHeatmap = GUILayout.Toggle(_displayHeatmap, "Position heatmap", _stylesManager.toggleStyle);
@@ -33,7 +46,6 @@ public class GUIHeatmap
             _positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
             if(showPositionHeatmap) EditorUtility.ClearProgressBar();
 
-            // Reset the heatmap scale
             if (showPositionHeatmap)
             {
                 _heatmapScaleLowerBoundStr = "0";

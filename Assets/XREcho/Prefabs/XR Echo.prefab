@@ -223,7 +223,6 @@ MonoBehaviour:
     replayGameObject: {fileID: 0}
     replayScripts: []
   recordShortcut: 114
-  showControlPointsWhileRecording: 0
 --- !u!1 &662750848313395463
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,9 +1417,9 @@ MonoBehaviour:
   guiRect:
     serializedVersion: 2
     x: 20
-    y: 175
+    y: 25
     width: 270
-    height: 777
+    height: 927
 --- !u!114 &7624471816676135667
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1444,7 +1443,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 923694861134489815}
-  - component: {fileID: 58816006763426839}
+  - component: {fileID: 7000392168168475542}
+  - component: {fileID: 4245492271015900096}
+  - component: {fileID: 3344850555209148219}
+  - component: {fileID: 7094071046223559043}
+  - component: {fileID: 709670785186286360}
   m_Layer: 0
   m_Name: TrajectoryManager
   m_TagString: Untagged
@@ -1466,7 +1469,7 @@ Transform:
   m_Father: {fileID: 390416245603189139}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &58816006763426839
+--- !u!114 &7000392168168475542
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1475,19 +1478,88 @@ MonoBehaviour:
   m_GameObject: {fileID: 2211853811558214606}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca86b3aaad9c90b45be338c5c6891fb1, type: 3}
+  m_Script: {fileID: 11500000, guid: 3c4c7e3535294eb8b120d350113e4100, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minDistanceInterval: 0.2
-  minTimeInterval: 0.1
-  showTrajectories: 0
-  radius: 0.03
-  nbRadialSegments: 8
-  closed: 0
-  numberOfColors: 3
-  startingColor: {r: 1, g: 0.19999999, b: 0.19999999, a: 1}
-  showControlPoints: 0
-  sphereSize: 0.1
+  tolerance: 0.25
+  thickness: 0.1
+  teleportationThreshold: 0.1
+--- !u!114 &4245492271015900096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2211853811558214606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545cae1435314fbb8537a406c3c09e83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!33 &3344850555209148219
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2211853811558214606}
+  m_Mesh: {fileID: 0}
+--- !u!23 &7094071046223559043
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2211853811558214606}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 97b8e189aa0123345acf926ac61bb766, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &709670785186286360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2211853811558214606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b48f417db0ece434ca2568e855cc3736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sections: []
+  lineMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  jointMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &2437964215772351341
 GameObject:
   m_ObjectHideFlags: 0
@@ -2003,6 +2075,8 @@ MonoBehaviour:
     mat: {fileID: 2100000, guid: c73f9237756c6d74ea5efd46940c2fe4, type: 2}
   - name: heatmap
     mat: {fileID: 2100000, guid: f525de63b8f97ad4a8b971efaa493896, type: 2}
+  - name: trajectory
+    mat: {fileID: 2100000, guid: 8cc242a0f77d7ea4b904b7f1806b2a67, type: 2}
   URPMaterials:
   - name: gaze
     mat: {fileID: 2100000, guid: f87d0a2e045aba84c94807d13214e8c8, type: 2}
@@ -2018,6 +2092,8 @@ MonoBehaviour:
     mat: {fileID: 2100000, guid: 6094b26aedf4d814bac8f62381caa319, type: 2}
   - name: heatmap
     mat: {fileID: 2100000, guid: 66b3741107d4d524d87d6bb941dc423e, type: 2}
+  - name: trajectory
+    mat: {fileID: 2100000, guid: c96b351666156a642bb3d2e3150673fe, type: 2}
 --- !u!1 &5569275799210359945
 GameObject:
   m_ObjectHideFlags: 0
