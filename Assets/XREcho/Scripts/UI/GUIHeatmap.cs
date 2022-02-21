@@ -96,11 +96,12 @@ public class GUIHeatmap
                 var heatmapScaleLowerBoundStyle = new GUIStyle(GUI.skin.textField);
                 var heatmapScaleUpperBoundStyle = new GUIStyle(GUI.skin.textField);
 
-                var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) &&
-                                      Math.Abs(heatmapScaleLowerBound) <= 10e-3;
-                var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound) &&
-                                      Math.Abs(heatmapScaleUpperBound - _positionHeatmapManager.GetMaxDuration()) <=
-                                      10e-3 && heatmapScaleUpperBound > heatmapScaleLowerBound;
+                var maxDuration = Math.Round(_positionHeatmapManager.GetMaxDuration(), 3);
+                
+                var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) && heatmapScaleLowerBound >= 0 && heatmapScaleLowerBound <= maxDuration + 10e-4;
+                var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound) 
+                                      && heatmapScaleUpperBound <= maxDuration + 10e-4
+                                      && heatmapScaleUpperBound > heatmapScaleLowerBound;
 
                 heatmapScaleLowerBoundStyle.normal.textColor = lowerBoundValid ? Color.white : Color.red;
                 heatmapScaleUpperBoundStyle.normal.textColor = upperBoundValid ? Color.white : Color.red;
