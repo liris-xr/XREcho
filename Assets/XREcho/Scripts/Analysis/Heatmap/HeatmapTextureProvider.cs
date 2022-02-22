@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class HeatmapTextureProvider : MonoBehaviour, IHeatmapTextureProvider
 {
@@ -8,15 +9,18 @@ public class HeatmapTextureProvider : MonoBehaviour, IHeatmapTextureProvider
     {
         var h = heatmap.GetLength(0);
         var w = heatmap.GetLength(1);
-        var pixels = new Color[w * h];
+        var pixels = new Color[h, w];
         var texture = new Texture2D(w, h);
 
-        for (var i = 0; i < pixels.Length; i++)
+        for (var x = 0; x < w; x++)
         {
-            pixels[i] = HeatmapColorForValue(heatmap[h - i / h - 1, w - i % h - 1]);
+            for (var y = 0; y < h; y++)
+            {
+                pixels[h - y - 1, w - x - 1] = HeatmapColorForValue(heatmap[y, x]);
+            }
         }
 
-        texture.SetPixels(pixels);
+        texture.SetPixels(pixels.Cast<Color>().ToArray());
         texture.Apply();
         return texture;
     }
