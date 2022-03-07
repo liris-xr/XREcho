@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Trajectory
-  m_Shader: {fileID: -6465566751694194690, guid: 7a2a83d7ba6f060429e952d594776804, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 2b63a69642d04f742887811ba8dde9c1, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
