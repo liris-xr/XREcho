@@ -233,7 +233,6 @@ public class GUIManager : MonoBehaviour
         if (currentTabHasChanged)
         {
             SetCurrentCamera(false);
-            _guiTrajectory.ShowTrajectory(false);
         }
 
         newProject = stylesManager.LabeledTextField(" Project:  ", newProject);
