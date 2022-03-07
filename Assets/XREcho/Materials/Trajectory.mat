@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Trajectory
-  m_Shader: {fileID: -6465566751694194690, guid: 2b63a69642d04f742887811ba8dde9c1, type: 3}
+  m_Shader: {fileID: 4800000, guid: 0274e398dff44d14ead4a1ef5d343a1a, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -121,5 +121,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EndColor: {r: 1, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _StartColor: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

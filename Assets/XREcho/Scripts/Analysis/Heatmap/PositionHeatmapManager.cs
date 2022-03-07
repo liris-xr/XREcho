@@ -23,6 +23,7 @@ public class PositionHeatmapManager : MonoBehaviour
     private IHeatmapWriter _heatmapWriter;
 
     private Material _heatmapMaterial;
+    private static readonly int Transparency = Shader.PropertyToID("_Transparency");
 
     private void Awake()
     {
@@ -71,7 +72,7 @@ public class PositionHeatmapManager : MonoBehaviour
     public void SetTransparency(float transparency)
     {
         _transparency = transparency;
-        heatmapProjectionPlane.GetComponent<Renderer>().material.color = new Color(1, 1, 1, _transparency);
+        heatmapProjectionPlane.GetComponent<Renderer>().material.SetFloat(Transparency, transparency);
     }
     
     public void SetScaleBounds(float heatmapScaleLowerBound, float heatmapScaleUpperBound)
@@ -130,9 +131,10 @@ public class PositionHeatmapManager : MonoBehaviour
             
             var heatmapMaterial = new Material(_heatmapMaterial)
             {
-                mainTexture = heatmapTexture, mainTextureScale = Vector2.one, color = new Color(1, 1, 1, _transparency)
+                mainTexture = heatmapTexture, mainTextureScale = Vector2.one
             };
             heatmapProjectionPlane.GetComponent<Renderer>().material = heatmapMaterial;
+            heatmapProjectionPlane.GetComponent<Renderer>().material.SetFloat(Transparency, _transparency);
         }
         catch (InvalidOperationException ex)
         {
