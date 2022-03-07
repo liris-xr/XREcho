@@ -1,3 +1,6 @@
+<p align="center"><img width="80%" src="xrecho_logo.png" alt="XREcho logo"></p>
+<p align="center"><a href="https://www.flaticon.com/free-icons/virtual-reality" style="color: lightgray" title="virtual reality icons">HMD icon created by AB Design - Flaticon</a></p>
+
 # XREcho
 Unity plug-in used to record and replay XR interactions, hmd and controllers movement and visualizing trajectory
 ## Instructions
