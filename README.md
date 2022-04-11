@@ -12,3 +12,9 @@ Unity plug-in used to record and replay XR interactions, hmd and controllers mov
 * Launch the application via Unity play mode
 
 For any enquiry please send an e-mail to : sophie.villenave@enise.fr
+
+## Reference
+Sophie Villenave, Jonathan Cabezas, Patrick Baert, Florent Dupont, and Guil-
+laume Lavoué. 2022. XREcho: A Unity plug-in to record and visualize user
+behavior during XR sessions. In Proceedings of ACM Multimedia Systems
+Conference (MMSys ’22). ACM, New York, NY, USA, 6 pages.
