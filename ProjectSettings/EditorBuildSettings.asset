@@ -9,5 +9,6 @@ EditorBuildSettings:
     path: Assets/Samples/Scenes/SampleScene.unity
     guid: d1c3109bdb54ad54c8a2b2838528e640
   m_configObjects:
+    Varjo.XR.Settings: {fileID: 11400000, guid: 5e9a472e05b6b6842b75b42b4b472fe4, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 380c8c32f01183a4f86d83498b501564, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 95be5215baa88224cafd1a984e95ff05, type: 2}

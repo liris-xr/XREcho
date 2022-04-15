@@ -1,12 +1,15 @@
 ﻿using System;
-//using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
+// TODO: add generation progress bar inside Unity Game GUI
 public class GUIHeatmap
 {
     private readonly PositionHeatmapManager _positionHeatmapManager;
     private readonly GUIStylesManager _stylesManager;
-    
+
     private bool _displayHeatmap;
     private bool _displayAggregatedHeatmap;
 
@@ -26,12 +29,16 @@ public class GUIHeatmap
     {
         if (_displayHeatmap)
         {
-            //EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+#if UNITY_EDITOR
+            EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+#endif
             _positionHeatmapManager.SetScaleBounds(0f, 1f);
             _positionHeatmapManager.ForceRegenerate();
             _heatmapScaleLowerBoundStr = "0";
             _heatmapScaleUpperBoundStr = $"{_positionHeatmapManager.GetMaxDuration():0.###}";
-            //EditorUtility.ClearProgressBar();
+#if UNITY_EDITOR
+            EditorUtility.ClearProgressBar();
+#endif
         }
     }
     
@@ -50,12 +57,19 @@ public class GUIHeatmap
     public void OnGui()
     {
         var showPositionHeatmap = GUILayout.Toggle(_displayHeatmap, "Position heatmap", _stylesManager.toggleStyle);
-        
+
         if (showPositionHeatmap != _displayHeatmap)
         {
             _displayHeatmap = showPositionHeatmap;
 
+#if UNITY_EDITOR
+            if (showPositionHeatmap)
+                EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+#endif
             _positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
+#if UNITY_EDITOR
+            if (showPositionHeatmap) EditorUtility.ClearProgressBar();
+#endif
 
             if (showPositionHeatmap)
             {
@@ -68,15 +82,29 @@ public class GUIHeatmap
         {
             GUILayout.BeginVertical("box");
 
-            var showAggregatedHeatmap = GUILayout.Toggle(_displayAggregatedHeatmap, "Aggregate all records", _stylesManager.toggleStyle);
+            var showAggregatedHeatmap = GUILayout.Toggle(_displayAggregatedHeatmap, "Aggregate all records",
+                _stylesManager.toggleStyle);
 
             if (showAggregatedHeatmap != _displayAggregatedHeatmap)
             {
                 _displayAggregatedHeatmap = showAggregatedHeatmap;
-                
+
+#if UNITY_EDITOR
+                if (showAggregatedHeatmap)
+                    EditorUtility.DisplayProgressBar("Generating aggregated heatmap",
+                        "Generating aggregated position heatmap texture...", -1);
+                else
+                    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...",
+                        -1);
+#endif
+
                 _positionHeatmapManager.ToggleAggregatedPositionHeatmap(showAggregatedHeatmap);
+
+#if UNITY_EDITOR
+                EditorUtility.ClearProgressBar();
+#endif
             }
-            
+
             GUILayout.Label("Heatmap transparency");
             var transparencyValue = GUILayout.HorizontalSlider(_lastHeatmapTransparency, 0f, 1f);
 
@@ -90,7 +118,14 @@ public class GUIHeatmap
             {
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
+#if UNITY_EDITOR
+                    EditorUtility.DisplayProgressBar("Generating aggregated heatmap",
+                        "Generating aggregated position heatmap texture...", -1);
+#endif
                     _positionHeatmapManager.ForceRegenerate();
+#if UNITY_EDITOR
+                    EditorUtility.ClearProgressBar();
+#endif
                 }
             }
             else
@@ -99,9 +134,10 @@ public class GUIHeatmap
                 var heatmapScaleUpperBoundStyle = new GUIStyle(GUI.skin.textField);
 
                 var maxDuration = Math.Round(_positionHeatmapManager.GetMaxDuration(), 3);
-                
-                var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) && heatmapScaleLowerBound >= 0 && heatmapScaleLowerBound <= maxDuration + 10e-4;
-                var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound) 
+
+                var lowerBoundValid = float.TryParse(_heatmapScaleLowerBoundStr, out var heatmapScaleLowerBound) &&
+                                      heatmapScaleLowerBound >= 0 && heatmapScaleLowerBound <= maxDuration + 10e-4;
+                var upperBoundValid = float.TryParse(_heatmapScaleUpperBoundStr, out var heatmapScaleUpperBound)
                                       && heatmapScaleUpperBound <= maxDuration + 10e-4
                                       && heatmapScaleUpperBound > heatmapScaleLowerBound;
 
@@ -160,7 +196,14 @@ public class GUIHeatmap
                 GUI.enabled = lowerBoundValid && upperBoundValid;
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
+#if UNITY_EDITOR
+                    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...",
+                        -1);
+#endif
                     _positionHeatmapManager.ForceRegenerate();
+#if UNITY_EDITOR
+                    EditorUtility.ClearProgressBar();
+#endif
                 }
 
                 GUI.enabled = true;
@@ -174,5 +217,4 @@ public class GUIHeatmap
             GUILayout.EndVertical();
         }
     }
-    
 }

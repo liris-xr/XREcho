@@ -36,7 +36,7 @@ public class XREchoEditor : Editor
     {
         serializedObject.Update();
 
-        if (((MonoBehaviour)target).isActiveAndEnabled && UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
+        if (((MonoBehaviour)target).isActiveAndEnabled && UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null)
         {
             if (allIsOk)
             {

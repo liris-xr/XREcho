@@ -54,6 +54,17 @@ public class ReplayManager : MonoBehaviour
     private List<List<Dictionary<string, object>>> eventsData;
     public List<List<string>> events;
 
+    private List<Dictionary<string, object>> eyeTrackingData;
+    public List<Dictionary<string, object>> EyeTrackingData => eyeTrackingData;
+
+    private bool _showGaze;
+    
+    public bool ShowGaze
+    {
+        get => _showGaze;
+        set => _showGaze = value;
+    }
+    
     private List<List<GameObject>> clones;
     private GameObject cloneObject;
     private List<GameObject> cloneByRecordingObjects;
@@ -184,6 +195,8 @@ public class ReplayManager : MonoBehaviour
         eventsData = new List<List<Dictionary<string, object>>>();
         events = new List<List<string>>();
 
+        eyeTrackingData = new List<Dictionary<string, object>>();
+        
         clones = new List<List<GameObject>>();
     }
 
@@ -592,6 +605,10 @@ public class ReplayManager : MonoBehaviour
                 LoadEventsFormat(Path.Combine(folder, eventsFormatFile));
                 LoadEventsData(Path.Combine(folder, eventsDataFile));
             }
+            
+            var eyeTrackingDataFile = GetCorrespondingFile(objectsDataFile, "eyeTrackingData", folder);
+            LoadEyeTrackingData(Path.Combine(folder, eyeTrackingDataFile));
+            
             Debug.Log("Replay loaded successfully.");
 
         }
@@ -703,6 +720,12 @@ public class ReplayManager : MonoBehaviour
             float totalReplayTimeOfObjects = (float)data[data.Count - 1]["timestamp"];
             totalReplayTime = Mathf.Max(totalReplayTime, totalReplayTimeOfObjects);
         }
+    }
+    
+    private void LoadEyeTrackingData(string dataFilepath)
+    {
+        var data = CSVReader.ReadCSV(dataFilepath);
+        eyeTrackingData.AddRange(data);
     }
 
     private void LoadEventsData(string dataFilepath)

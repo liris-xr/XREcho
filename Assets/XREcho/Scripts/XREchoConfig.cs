@@ -159,7 +159,7 @@ public class XREchoConfig : MonoBehaviour
         ApplyCulture();
 
 #if UNITY_EDITOR
-        if (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null) {
+        if (UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() == null) {
             ExportConfig();
         }
 #endif

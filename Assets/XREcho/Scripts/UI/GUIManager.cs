@@ -94,7 +94,7 @@ public class GUIManager : MonoBehaviour
         currentTurningAngle = 0;
         
         displayCameraView = false;
-        displayGazeVisu = recordingManager.recordEyeTracking;
+        displayGazeVisu = false;
         needReplayListUpdate = false;
         nextFFMode = 0;
 
@@ -295,11 +295,23 @@ public class GUIManager : MonoBehaviour
         GUI.color = Color.white;
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-        if (recordingManager.recordEyeTracking)
+        
+        if (recordingManager.eyeTrackingProviderType != EyeTrackingProviderType.None)
         {
             if (GUILayout.Button("Launch Eye Calibration"))
             {
-                Utils.GetClassType("GetEyeTrackingData").GetMethod("LaunchEyeCalibration").Invoke(null, null);
+                var provider = EyeTrackingManager.GetInstance()
+                    .GetProviderByType(recordingManager.eyeTrackingProviderType);
+
+                if (provider != null)
+                {
+                    provider.RequestEyeCalibration();
+                    Debug.Log("Requested eye calibration.");
+                }
+                else
+                {
+                    Debug.LogError($"Provider for {recordingManager.eyeTrackingProviderType} not found.");
+                }
             }
         }
     }
@@ -526,9 +538,7 @@ public class GUIManager : MonoBehaviour
 
     private void ActivateGazeVisu()
     {
-        foreach (MonoBehaviour showViz in transform.root.GetComponentsInChildren<ShowGaze>(true))
-            if (showViz.gameObject.name != "XREchoEyeTracker")
-                showViz.enabled = displayGazeVisu;
+        ReplayManager.GetInstance().ShowGaze = displayGazeVisu;
     }
 
     private void AsyncLoad()

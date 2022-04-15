@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Curve;
 using Tubular;
 
-public class ShowGaze : MonoBehaviour
+public class ShowGaze_old : MonoBehaviour
 {
     public float rayVerticalOffset = 0.05f;
     public float radius = 0.02f;

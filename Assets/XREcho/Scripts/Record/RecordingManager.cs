@@ -1,15 +1,15 @@
-using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.SceneManagement;
-using UnityEditor;
-
-using System.IO;
 using System;
-using System.Reflection;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
-
+using System.Globalization;
+using System.IO;
+using System.Linq;
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 /*
@@ -64,18 +64,30 @@ public class RecordingManager : MonoBehaviour
     private static RecordingManager instance;
 
     private bool recording;
-    public bool IsRecording() { return recording; }
+
+    public bool IsRecording()
+    {
+        return recording;
+    }
+
     private float timeSinceStartOfRecording;
-    public float GetTimeSinceStartOfRecording() { return timeSinceStartOfRecording; }
+
+    public float GetTimeSinceStartOfRecording()
+    {
+        return timeSinceStartOfRecording;
+    }
+
     private float timeSinceLastControlPoint;
     private int nbOriginalTrackedObjects;
     private bool keepRecordingOnNewScene = true;
-    private bool recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
-    private GameObject eyeTracker;
+
+    private bool
+        recordingOnSceneUnloaded; // Used to track if we were recording on scene change if keepRecordingOnNewScene is true
 
     private CSVWriter metadataWriter;
     private CSVWriter objectsWriter;
     private CSVWriter eventsWriter;
+    private CSVWriter eyeTrackingWriter;
     private CSVWriter objectsFormatWriter;
     private CSVWriter eventsFormatWriter;
 
@@ -85,16 +97,17 @@ public class RecordingManager : MonoBehaviour
     private Dictionary<string, int> eventToId;
     private List<string> events;
 
+    private float _elapsedTime;
 
     public bool trackXRControllers = true;
     public bool trackXRInteractables = true;
     public LayerMask trackedLayers;
-    public bool recordEyeTracking = false;
+
+    public EyeTrackingProviderType eyeTrackingProviderType;
+
     public float trackingRateHz = 100;
-    [Space(8)]
-    public List<TrackedObject> trackedObjects = new List<TrackedObject>();
-    [Space(8)]
-    public KeyCode recordShortcut = KeyCode.R;
+    [Space(8)] public List<TrackedObject> trackedObjects = new List<TrackedObject>();
+    [Space(8)] public KeyCode recordShortcut = KeyCode.R;
     private float recordKeyCooldown = 0.4f;
     private float recAlpha = 1.0f;
 
@@ -134,6 +147,7 @@ public class RecordingManager : MonoBehaviour
         {
             ToggleRecording(recordKeyCooldown);
         }
+
         if (recording)
         {
             GUILayout.BeginArea(new Rect(10, 5, 200, 100));
@@ -153,7 +167,7 @@ public class RecordingManager : MonoBehaviour
         metadata = new List<RecordingMetadata>();
     }
 
-    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode mode)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         NewScene(scene.name);
         if (recordingOnSceneUnloaded)
@@ -163,7 +177,7 @@ public class RecordingManager : MonoBehaviour
         }
     }
 
-    private void OnSceneUnloaded(UnityEngine.SceneManagement.Scene current)
+    private void OnSceneUnloaded(Scene current)
     {
         if (recording)
         {
@@ -185,7 +199,7 @@ public class RecordingManager : MonoBehaviour
     private void OnValidate()
     {
 #if UNITY_EDITOR
-        if (UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null) 
+        if (PrefabStageUtility.GetCurrentPrefabStage() != null)
             return;
 
         foreach (TrackedObject to in trackedObjects)
@@ -194,29 +208,6 @@ public class RecordingManager : MonoBehaviour
                 to.objPath = Utils.GetGameObjectPath(to.obj);
         }
 
-        if (recordEyeTracking && eyeTracker == null)
-        {
-            if (Utils.GetClassType("GetEyeTrackingData") == null)
-            {
-                Debug.LogError("Eye Tracking can not be activated : the EyeTracking folder has not been imported. You need to import it and to install the Vive SRanipal SDK.");
-                recordEyeTracking = false;
-            } else {
-                eyeTracker = GameObject.Find("XREchoEyeTracker");
-                if (eyeTracker == null) {
-                    GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/XREcho/EyeTracking/Prefabs/XREchoEyeTracker.prefab", typeof(GameObject));
-                    eyeTracker = (GameObject)Instantiate(prefab, transform);
-                    eyeTracker.name = "XREchoEyeTracker";
-                }
-            }
-        }
-        else if(!recordEyeTracking && eyeTracker != null)
-        {
-            EditorApplication.delayCall += () =>
-            {
-                DestroyImmediate(eyeTracker);
-            };
-            
-        }
         ComputeAllTrackedObjects();
 #endif
     }
@@ -240,7 +231,8 @@ public class RecordingManager : MonoBehaviour
                 to.obj = GameObject.Find(to.objPath);
 
                 if (to.obj == null && recording)
-                    Debug.LogError("Couldn't find object " + to.objPath + ", you can hot-plug it during the recording.");
+                    Debug.LogError("Couldn't find object " + to.objPath +
+                                   ", you can hot-plug it during the recording.");
             }
 
             if (to.trackPosition || to.trackRotation)
@@ -275,7 +267,8 @@ public class RecordingManager : MonoBehaviour
     private TrackedObject GetTrackedObject(string objPath)
     {
         foreach (TrackedObject to in trackedObjects)
-            if (to.objPath == objPath) return to;
+            if (to.objPath == objPath)
+                return to;
         return null;
     }
 
@@ -306,7 +299,7 @@ public class RecordingManager : MonoBehaviour
 
     private void TrackControllerGameObjects()
     {
-        foreach (XRBaseController controller in GameObject.FindObjectsOfType<XRBaseController>(true))
+        foreach (XRBaseController controller in FindObjectsOfType<XRBaseController>(true))
         {
             if (trackXRControllers)
                 AddTrackedObject(controller.gameObject);
@@ -317,7 +310,7 @@ public class RecordingManager : MonoBehaviour
 
     private void TrackInteractableGameObjects()
     {
-        foreach (XRBaseInteractable interactable in GameObject.FindObjectsOfType<XRBaseInteractable>(true))
+        foreach (XRBaseInteractable interactable in FindObjectsOfType<XRBaseInteractable>(true))
         {
             if (trackXRInteractables)
                 AddTrackedObject(interactable.gameObject);
@@ -329,7 +322,6 @@ public class RecordingManager : MonoBehaviour
     private bool CanRelease(GameObject go)
     {
         if (go.tag == "MainCamera") return false;
-        if (recordEyeTracking && go == eyeTracker) return false;
         if (trackXRControllers && go.GetComponent<XRBaseController>() != null) return false;
         if (trackXRInteractables && go.GetComponent<XRBaseInteractable>() != null) return false;
         return true;
@@ -343,7 +335,8 @@ public class RecordingManager : MonoBehaviour
             if ((LayerMask.GetMask(LayerMask.LayerToName(go.layer)) & trackedLayers) != 0)
             {
                 AddTrackedObject(go);
-            } else if (CanRelease(go))
+            }
+            else if (CanRelease(go))
             {
                 RemoveTrackedObject(go);
             }
@@ -354,17 +347,6 @@ public class RecordingManager : MonoBehaviour
     {
         if (Camera.main != null)
             AddTrackedObject(Camera.main.gameObject);
-        
-        if (recordEyeTracking)
-        {
-            AddTrackedObject(eyeTracker);
-            if (eyeTracker == null)
-                Debug.LogError("EyeTracker object not found : eye tracking datas will not be recorded.");
-        }
-        else
-        {
-            RemoveTrackedObject(eyeTracker);
-        }
         TrackControllerGameObjects();
         TrackInteractableGameObjects();
         TrackGameObjectsInTrackedLayers();
@@ -390,13 +372,11 @@ public class RecordingManager : MonoBehaviour
     /*
      * Creates files to write the recording to
      */
-    private void CreateDataFiles()   
+    private void CreateDataFiles()
     {
-        string filePath = GetSavePath("objectsData");
-        objectsWriter = new CSVWriter(filePath);
-
-        filePath = GetSavePath("eventsData");
-        eventsWriter = new CSVWriter(filePath);
+        objectsWriter = new CSVWriter(GetSavePath("objectsData"));
+        eventsWriter = new CSVWriter(GetSavePath("eventsData"));
+        eyeTrackingWriter = new CSVWriter(GetSavePath("eyeTrackingData"));
     }
 
     public void ToggleRecording(float minRecordTime = 0.0f)
@@ -414,6 +394,7 @@ public class RecordingManager : MonoBehaviour
             Debug.LogError("Can't create directory to save recordings, aborting recording");
             return;
         }
+
         Debug.Log("Recording started.");
 
         metadata.Add(new RecordingMetadata());
@@ -422,7 +403,7 @@ public class RecordingManager : MonoBehaviour
 
         events = new List<string>();
         eventToId = new Dictionary<string, int>();
-        
+
         ResetTimers();
 
         if (!ExportFormat())
@@ -472,17 +453,20 @@ public class RecordingManager : MonoBehaviour
 
         if (File.Exists(objectsFormatSavePath))
         {
-            Debug.LogError("A format file named " + objectsFormatSavePath + " would be overwritten by recording, aborting recording.");
+            Debug.LogError("A format file named " + objectsFormatSavePath +
+                           " would be overwritten by recording, aborting recording.");
             return false;
         }
 
         objectsFormatWriter = new CSVWriter(objectsFormatSavePath);
         //Debug.Log("Started recording objects format to " + objectsFormatSavePath);
-        objectsFormatWriter.WriteLine("type", "trackedData", "position", "rotation", "camera", "trackingRate", "replayGameObject", "replayScripts");
+        objectsFormatWriter.WriteLine("type", "trackedData", "position", "rotation", "camera", "trackingRate",
+            "replayGameObject", "replayScripts");
 
         foreach (TrackedObject to in trackedObjects)
-            objectsFormatWriter.WriteLine("object", to.objPath, to.trackPosition.ToString(), to.trackRotation.ToString(), to.trackCamera.ToString(),
-                                                    to.trackingRate.ToString(), ExportReplayGameObject(to), ExportReplayScripts(to));
+            objectsFormatWriter.WriteLine("object", to.objPath, to.trackPosition.ToString(),
+                to.trackRotation.ToString(), to.trackCamera.ToString(),
+                to.trackingRate.ToString(), ExportReplayGameObject(to), ExportReplayScripts(to));
 
         /*
          * Exporting Events Format
@@ -500,10 +484,11 @@ public class RecordingManager : MonoBehaviour
         recording = false;
         objectsWriter.Close();
         eventsWriter.Close();
+        eyeTrackingWriter.Close();
         objectsFormatWriter.Close();
         eventsFormatWriter.Close();
         WriteMetadata();
-        
+
         Debug.Log("Recording Stopped. Datas have been written in " + config.GetSessionFolder() + ".");
     }
 
@@ -518,13 +503,24 @@ public class RecordingManager : MonoBehaviour
     private void Update()
     {
         timeSinceStartOfRecording += Time.deltaTime;
+        _elapsedTime += Time.deltaTime;
 
         if (!recording)
             return;
-        
+
         // Here we are recording
         UpdateTimers();
         WriteTrackedObjects();
+
+        if (_elapsedTime >= 1.0 / trackingRateHz)
+        {
+            _elapsedTime = 0;
+
+            if (eyeTrackingProviderType != EyeTrackingProviderType.None)
+            {
+                WriteEyeTrackingData();
+            }
+        }
     }
 
     public int GetFilesSize()
@@ -537,7 +533,56 @@ public class RecordingManager : MonoBehaviour
         if (eventsWriter != null)
             size += eventsWriter.GetSizeOfFile();
 
+        if (eyeTrackingWriter != null)
+            size += eyeTrackingWriter.GetSizeOfFile();
+
         return size;
+    }
+
+    private void WriteEyeTrackingData()
+    {
+        var eyeTrackingManager = EyeTrackingManager.GetInstance();
+        var gazeOrigin = eyeTrackingManager.GetProviderByType(eyeTrackingProviderType)?.GetGazeOrigin();
+        var gazeDirection = eyeTrackingManager.GetProviderByType(eyeTrackingProviderType)?.GetGazeDirection();
+        var leftPupilDiameter = eyeTrackingManager.GetProviderByType(eyeTrackingProviderType)?.GetLeftPupilDiameter();
+        var rightPupilDiameter = eyeTrackingManager.GetProviderByType(eyeTrackingProviderType)?.GetRightPupilDiameter();
+
+        string gazeOriginXStr, gazeOriginYStr, gazeOriginZStr;
+        string gazeDirectionXStr, gazeDirectionYStr, gazeDirectionZStr;
+
+        if (gazeOrigin == null || gazeDirection == null)
+        {
+            gazeOriginXStr = "N/A";
+            gazeOriginYStr = "N/A";
+            gazeOriginZStr = "N/A";
+            gazeDirectionXStr = "N/A";
+            gazeDirectionYStr = "N/A";
+            gazeDirectionZStr = "N/A";
+        }
+        else
+        {
+            gazeOriginXStr = gazeOrigin.Value.x.ToString(CultureInfo.CurrentCulture);
+            gazeOriginYStr = gazeOrigin.Value.y.ToString(CultureInfo.CurrentCulture);
+            gazeOriginZStr = gazeOrigin.Value.z.ToString(CultureInfo.CurrentCulture);
+            gazeDirectionXStr = gazeDirection.Value.x.ToString(CultureInfo.CurrentCulture);
+            gazeDirectionYStr = gazeDirection.Value.y.ToString(CultureInfo.CurrentCulture);
+            gazeDirectionZStr = gazeDirection.Value.z.ToString(CultureInfo.CurrentCulture);
+        }
+
+        string leftPupilDiameterStr, rightPupilDiameterStr;
+        if (leftPupilDiameter == null || rightPupilDiameter == null)
+        {
+            leftPupilDiameterStr = "N/A";
+            rightPupilDiameterStr = "N/A";
+        }
+        else
+        {
+            leftPupilDiameterStr = leftPupilDiameter.ToString();
+            rightPupilDiameterStr = rightPupilDiameter.ToString();
+        }
+
+        WriteEntry(eyeTrackingWriter, gazeOriginXStr, gazeOriginYStr, gazeOriginZStr, gazeDirectionXStr,
+            gazeDirectionYStr, gazeDirectionZStr, leftPupilDiameterStr, rightPupilDiameterStr);
     }
 
     private void WriteTrackedObjects()
@@ -555,7 +600,8 @@ public class RecordingManager : MonoBehaviour
                 {
                     //Debug.Log(to.objPath + " was found, now tracking it.");
                     action.targetObj = to.obj;
-                } else
+                }
+                else
                 {
                     i++;
                     continue;
@@ -568,7 +614,8 @@ public class RecordingManager : MonoBehaviour
 
                 if (action.type == ActionType.POS_AND_ROT)
                 {
-                    if (!to.obj.transform.position.Equals(to.lastPosition) || !to.obj.transform.eulerAngles.Equals(to.lastRotation))
+                    if (!to.obj.transform.position.Equals(to.lastPosition) ||
+                        !to.obj.transform.eulerAngles.Equals(to.lastRotation))
                         WriteObjectsDataEntry(i, to.obj.transform.position, to.obj.transform.rotation);
 
                     to.lastPosition = to.obj.transform.position;
@@ -667,13 +714,18 @@ public class RecordingManager : MonoBehaviour
 
     private void WriteHeaders()
     {
-        objectsWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "actionId", "position.x", "position.y", "position.z", "rotation.x", "rotation.y", "rotation.z");
+        objectsWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "actionId", "position.x", "position.y",
+            "position.z", "rotation.x", "rotation.y", "rotation.z");
         eventsWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "eventId");
+        eyeTrackingWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "gazeOrigin.x", "gazeOrigin.y",
+            "gazeOrigin.z", "gazeDirection.x", "gazeDirection.y", "gazeDirection.z", "leftPupilDiameter (mm)",
+            "rightPupilDiameter (mm)");
 
         if (metadataWriter == null)
         {
             metadataWriter = new CSVWriter(GetSavePath("metadata"));
-            metadataWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "scene", "duration", "nbTrackedObjects", "nbEvents", "trackingScripts");
+            metadataWriter.WriteLine("timestamp", "ticksSince1970 (100ns)", "scene", "duration", "nbTrackedObjects",
+                "nbEvents", "trackingScripts");
         }
     }
 
@@ -682,7 +734,8 @@ public class RecordingManager : MonoBehaviour
         RecordingMetadata rm = metadata[metadata.Count - 1];
         TimeSpan duration = DateTime.Now - rm.GetDateTime();
 
-        metadataWriter.WriteLine(rm.GetDate(), rm.GetTicks(), rm.GetSceneName(), duration.ToString(), trackedObjects.Count, events.Count, "");
+        metadataWriter.WriteLine(rm.GetDate(), rm.GetTicks(), rm.GetSceneName(), duration.ToString(),
+            trackedObjects.Count, events.Count, "");
     }
 
     public string GetSavePath(string type, string extension = "csv")
