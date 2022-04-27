@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine;
 
 public class GUIHeatmap
@@ -26,12 +26,12 @@ public class GUIHeatmap
     {
         if (_displayHeatmap)
         {
-            EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+            //EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
             _positionHeatmapManager.SetScaleBounds(0f, 1f);
             _positionHeatmapManager.ForceRegenerate();
             _heatmapScaleLowerBoundStr = "0";
             _heatmapScaleUpperBoundStr = $"{_positionHeatmapManager.GetMaxDuration():0.###}";
-            EditorUtility.ClearProgressBar();
+            //EditorUtility.ClearProgressBar();
         }
     }
 
@@ -42,9 +42,9 @@ public class GUIHeatmap
         if (showPositionHeatmap != _displayHeatmap)
         {
             _displayHeatmap = showPositionHeatmap;
-            if(showPositionHeatmap) EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+            //if(showPositionHeatmap) EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
             _positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
-            if(showPositionHeatmap) EditorUtility.ClearProgressBar();
+            //if(showPositionHeatmap) EditorUtility.ClearProgressBar();
 
             if (showPositionHeatmap)
             {
@@ -63,14 +63,14 @@ public class GUIHeatmap
             {
                 _displayAggregatedHeatmap = showAggregatedHeatmap;
                 
-                if(showAggregatedHeatmap)
-                    EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
-                else
-                    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+                //if(showAggregatedHeatmap)
+                //    EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
+                //else
+                //    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
                 
                 _positionHeatmapManager.ToggleAggregatedPositionHeatmap(showAggregatedHeatmap);
                 
-                EditorUtility.ClearProgressBar();
+                //EditorUtility.ClearProgressBar();
             }
             
             GUILayout.Label("Heatmap transparency");
@@ -86,9 +86,9 @@ public class GUIHeatmap
             {
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
-                    EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
+                    //EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
                     _positionHeatmapManager.ForceRegenerate();
-                    EditorUtility.ClearProgressBar();
+                    //EditorUtility.ClearProgressBar();
                 }
             }
             else
@@ -158,10 +158,10 @@ public class GUIHeatmap
                 GUI.enabled = lowerBoundValid && upperBoundValid;
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
-                    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...",
-                        -1);
+                    //EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...",
+                    //    -1);
                     _positionHeatmapManager.ForceRegenerate();
-                    EditorUtility.ClearProgressBar();
+                    //EditorUtility.ClearProgressBar();
                 }
 
                 GUI.enabled = true;
