@@ -208,45 +208,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: recordEyeTracking
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.size
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[14].obj
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[15].obj
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[16].obj
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[17].obj
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: trackedObjects.Array.data[18].obj
       value: 
       objectReference: {fileID: 2081728656}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[19].obj
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[18].objPath
-      value: /Scene/Plane
-      objectReference: {fileID: 0}
-    - target: {fileID: 1050441359120935851, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
-      propertyPath: trackedObjects.Array.data[19].objPath
-      value: /XR Echo/RecordingManager/XREchoEyeTracker
-      objectReference: {fileID: 0}
     - target: {fileID: 3344850555209148219, guid: 00cd22cf1d25e2947b5f378b9e735ac4, type: 3}
       propertyPath: m_Mesh
       value: 

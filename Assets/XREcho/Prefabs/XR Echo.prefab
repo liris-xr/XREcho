@@ -271,55 +271,19 @@ MonoBehaviour:
     replayGameObject: {fileID: 0}
     replayScripts: []
   - obj: {fileID: 0}
-    objPath: /XR Origin/Camera Offset/LeftHand Controller
-    trackPosition: 1
-    trackRotation: 1
-    trackCamera: 0
-    trackingRate: 100
-    trackingInterval: 0.01
-    timeSinceLastWrite: 0
-    lastPosition: {x: 0, y: 0, z: 0}
-    lastRotation: {x: 0, y: 0, z: 0}
-    replayGameObject: {fileID: 0}
-    replayScripts: []
-  - obj: {fileID: 0}
-    objPath: /XR Origin/Camera Offset/RightHand Controller
-    trackPosition: 1
-    trackRotation: 1
-    trackCamera: 0
-    trackingRate: 100
-    trackingInterval: 0.01
-    timeSinceLastWrite: 0
-    lastPosition: {x: 0, y: 0, z: 0}
-    lastRotation: {x: 0, y: 0, z: 0}
-    replayGameObject: {fileID: 0}
-    replayScripts: []
-  - obj: {fileID: 0}
-    objPath: /Scene/XRGrabInteractables/Cube (2)
-    trackPosition: 1
-    trackRotation: 1
-    trackCamera: 0
-    trackingRate: 100
-    trackingInterval: 0.01
-    timeSinceLastWrite: 0
-    lastPosition: {x: 0, y: 0, z: 0}
-    lastRotation: {x: 0, y: 0, z: 0}
-    replayGameObject: {fileID: 0}
-    replayScripts: []
-  - obj: {fileID: 0}
-    objPath: /Scene/XRGrabInteractables/Cube (1)
-    trackPosition: 1
-    trackRotation: 1
-    trackCamera: 0
-    trackingRate: 100
-    trackingInterval: 0.01
-    timeSinceLastWrite: 0
-    lastPosition: {x: 0, y: 0, z: 0}
-    lastRotation: {x: 0, y: 0, z: 0}
-    replayGameObject: {fileID: 0}
-    replayScripts: []
-  - obj: {fileID: 0}
     objPath: /Scene/Plane
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Echo/RecordingManager/XREchoEyeTracker
     trackPosition: 1
     trackRotation: 1
     trackCamera: 0
