@@ -27,6 +27,6 @@ public class GaussianProvider : MonoBehaviour, IGaussianProvider
             }
         }
 
-        return new Gaussian(coefficients, diameter);
+        return new Gaussian(coefficients, radius);
     }
 }

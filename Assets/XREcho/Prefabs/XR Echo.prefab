@@ -283,7 +283,55 @@ MonoBehaviour:
     replayGameObject: {fileID: 0}
     replayScripts: []
   - obj: {fileID: 0}
-    objPath: /XR Echo/RecordingManager/XREchoEyeTracker
+    objPath: /XR Origin/Camera Offset/LeftHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /XR Origin/Camera Offset/RightHand Controller
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (2)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/XRGrabInteractables/Cube (1)
+    trackPosition: 1
+    trackRotation: 1
+    trackCamera: 0
+    trackingRate: 100
+    trackingInterval: 0.01
+    timeSinceLastWrite: 0
+    lastPosition: {x: 0, y: 0, z: 0}
+    lastRotation: {x: 0, y: 0, z: 0}
+    replayGameObject: {fileID: 0}
+    replayScripts: []
+  - obj: {fileID: 0}
+    objPath: /Scene/Plane
     trackPosition: 1
     trackRotation: 1
     trackCamera: 0
@@ -1941,35 +1989,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e53e56cdac0c4fe78be1db7a5a7ccb4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heatmapColorGradient:
-    serializedVersion: 2
-    key0: {r: 0, g: 0, b: 1, a: 1}
-    key1: {r: 0, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 1, b: 0, a: 0}
-    key3: {r: 1, g: 0.92156863, b: 0.015686275, a: 0}
-    key4: {r: 1, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 16384
-    ctime2: 32768
-    ctime3: 49151
-    ctime4: 65535
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 5
-    m_NumAlphaKeys: 2
 --- !u!114 &5160721305865499359
 MonoBehaviour:
   m_ObjectHideFlags: 0
