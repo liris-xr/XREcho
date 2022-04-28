@@ -24,6 +24,8 @@ public class PositionHeatmapManager : MonoBehaviour
 
     private Material _heatmapMaterial;
     private static readonly int Transparency = Shader.PropertyToID("_Transparency");
+    private static readonly int ScaleLowerBound = Shader.PropertyToID("_ScaleLowerBound");
+    private static readonly int ScaleUpperBound = Shader.PropertyToID("_ScaleUpperBound");
 
     private void Awake()
     {
@@ -72,13 +74,15 @@ public class PositionHeatmapManager : MonoBehaviour
     public void SetTransparency(float transparency)
     {
         _transparency = transparency;
-        heatmapProjectionPlane.GetComponent<Renderer>().material.SetFloat(Transparency, transparency);
+        _heatmapMaterial.SetFloat(Transparency, transparency);
     }
     
     public void SetScaleBounds(float heatmapScaleLowerBound, float heatmapScaleUpperBound)
     {
         _scaleLowerBound = heatmapScaleLowerBound;
         _scaleUpperBound = heatmapScaleUpperBound;
+        _heatmapMaterial.SetFloat(ScaleLowerBound, _scaleLowerBound);
+        _heatmapMaterial.SetFloat(ScaleUpperBound, _scaleUpperBound);
         // ComputeAndApplyHeatmap();
     }
 
@@ -117,24 +121,40 @@ public class PositionHeatmapManager : MonoBehaviour
         try
         {
             Texture2D heatmapTexture;
-            
+
             if (aggregationMode)
             {
-                _recordDataProvider.LoadAllProjectRecordsData(out var positions, out var timestamps, out var recordDurations);
-                heatmapTexture = _positionHeatmapProvider.CreateAggregatedPositionHeatmapTexture(positions, timestamps, recordDurations, heatmapProjectionPlane);
+                _recordDataProvider.LoadAllProjectRecordsData(out var positions, out var timestamps,
+                    out var recordDurations);
+                heatmapTexture = _positionHeatmapProvider.CreateAggregatedPositionHeatmapTexture(positions, timestamps,
+                    recordDurations, heatmapProjectionPlane);
             }
             else
             {
-                _recordDataProvider.LoadSelectedRecordData(out var positions, out var timestamps, out var recordDuration);
-                heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps, recordDuration, _scaleLowerBound, _scaleUpperBound, heatmapProjectionPlane);
+                _recordDataProvider.LoadSelectedRecordData(out var positions, out var timestamps,
+                    out var recordDuration);
+                heatmapTexture = _positionHeatmapProvider.CreatePositionHeatmapTexture(positions, timestamps,
+                    recordDuration, 0, 1, heatmapProjectionPlane);
             }
-            
+
             var heatmapMaterial = new Material(_heatmapMaterial)
             {
                 mainTexture = heatmapTexture, mainTextureScale = Vector2.one
             };
             heatmapProjectionPlane.GetComponent<Renderer>().material = heatmapMaterial;
-            heatmapProjectionPlane.GetComponent<Renderer>().material.SetFloat(Transparency, _transparency);
+            _heatmapMaterial = heatmapMaterial;
+            _heatmapMaterial.SetFloat(Transparency, _transparency);
+
+            if (aggregationMode)
+            {
+                _heatmapMaterial.SetFloat(ScaleLowerBound, 0);
+                _heatmapMaterial.SetFloat(ScaleUpperBound, 1);
+            }
+            else
+            {
+                _heatmapMaterial.SetFloat(ScaleLowerBound, _scaleLowerBound);
+                _heatmapMaterial.SetFloat(ScaleUpperBound, _scaleUpperBound);
+            }
         }
         catch (InvalidOperationException ex)
         {
