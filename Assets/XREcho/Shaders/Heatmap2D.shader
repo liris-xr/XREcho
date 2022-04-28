@@ -93,10 +93,10 @@
             {
                 const float value = tex2D(_MainTex, i.uv).r;
                 const float scaled_value = clamp((value - _ScaleLowerBound) / (_ScaleUpperBound - _ScaleLowerBound), 0, 1);
-                
-                float3 first_color_hsv = rgb_to_hsv(_FirstColor.rgb);
-                float3 second_color_hsv = rgb_to_hsv(_SecondColor.rgb);
-                float3 third_color_hsv = rgb_to_hsv(_ThirdColor.rgb);
+
+                const float3 first_color_hsv = rgb_to_hsv(_FirstColor.rgb);
+                const float3 second_color_hsv = rgb_to_hsv(_SecondColor.rgb);
+                const float3 third_color_hsv = rgb_to_hsv(_ThirdColor.rgb);
                 
                 float3 color_hsv;
                 float alpha;

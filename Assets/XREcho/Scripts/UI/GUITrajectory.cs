@@ -41,7 +41,9 @@ public class GUITrajectory
         {
             GUILayout.BeginVertical("box");
             GUILayout.Label($"Quality: {(1 - _trajectoryManager.tolerance) * 100:0}%");
-            var tolerance = 1 - GUILayout.HorizontalSlider(1 - _trajectoryManager.tolerance, 0f, 1f);
+            
+            // Limited to 99% due to performance issues
+            var tolerance = 1 - GUILayout.HorizontalSlider(1 - _trajectoryManager.tolerance, 0f, 0.99f);
             
             if (Math.Abs(_trajectoryManager.tolerance - tolerance) > 10e-3)
             {
