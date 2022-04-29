@@ -34,7 +34,19 @@ public class GUIHeatmap
             //EditorUtility.ClearProgressBar();
         }
     }
-
+    
+    private void DisplayToolbarIcon(Texture icon, int x, int y, bool blink = false, bool turnAround = false)
+    {
+        var matrixBackup = GUI.matrix;
+        GUI.color = Color.white;
+        var size = (int)_stylesManager.tabButtonsStyle.lineHeight;
+        var pivotPoint = new Vector2(x + size / 2, y + size / 2);
+        if (turnAround) GUIUtility.RotateAroundPivot(Time.time % 360, pivotPoint);
+        GUI.Box(new Rect(x, y, size, size), icon, GUIStyle.none);
+        if (turnAround) GUI.matrix = matrixBackup;
+        GUI.color = Color.white;
+    }
+    
     public void OnGui()
     {
         var showPositionHeatmap = GUILayout.Toggle(_displayHeatmap, "Position heatmap", _stylesManager.toggleStyle);
@@ -42,9 +54,8 @@ public class GUIHeatmap
         if (showPositionHeatmap != _displayHeatmap)
         {
             _displayHeatmap = showPositionHeatmap;
-            //if(showPositionHeatmap) EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
+
             _positionHeatmapManager.TogglePositionHeatmap(showPositionHeatmap);
-            //if(showPositionHeatmap) EditorUtility.ClearProgressBar();
 
             if (showPositionHeatmap)
             {
@@ -63,14 +74,7 @@ public class GUIHeatmap
             {
                 _displayAggregatedHeatmap = showAggregatedHeatmap;
                 
-                //if(showAggregatedHeatmap)
-                //    EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
-                //else
-                //    EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...", -1);
-                
                 _positionHeatmapManager.ToggleAggregatedPositionHeatmap(showAggregatedHeatmap);
-                
-                //EditorUtility.ClearProgressBar();
             }
             
             GUILayout.Label("Heatmap transparency");
@@ -86,9 +90,7 @@ public class GUIHeatmap
             {
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
-                    //EditorUtility.DisplayProgressBar("Generating aggregated heatmap", "Generating aggregated position heatmap texture...", -1);
                     _positionHeatmapManager.ForceRegenerate();
-                    //EditorUtility.ClearProgressBar();
                 }
             }
             else
@@ -158,10 +160,7 @@ public class GUIHeatmap
                 GUI.enabled = lowerBoundValid && upperBoundValid;
                 if (GUILayout.Button("Force re-generate heatmap"))
                 {
-                    //EditorUtility.DisplayProgressBar("Generating heatmap", "Generating position heatmap texture...",
-                    //    -1);
                     _positionHeatmapManager.ForceRegenerate();
-                    //EditorUtility.ClearProgressBar();
                 }
 
                 GUI.enabled = true;

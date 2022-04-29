@@ -31,6 +31,10 @@ public class ReplayManager : MonoBehaviour
     private float totalReplayTime;
     public float GetTotalReplayTime() { return totalReplayTime; }
 
+    public string replayProject;
+    public string replaySession;
+    public string replayRecord;
+
     private int targetDisplay;
     private Camera mainCamera;
     public void SetMainCamera(Camera camera) { mainCamera = camera; }
