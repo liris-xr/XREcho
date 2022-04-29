@@ -534,18 +534,28 @@ public class GUIManager : MonoBehaviour
     {
         GUILayout.BeginHorizontal();
 
-        GUITab newTab = currentTab;
-        for (int i = 0; i < toolbarStrings.Length; i++)
+        var noRecordLoaded = replayManager.objectsData == null || replayManager.objectsData.Count == 0;
+        
+        var newTab = currentTab;
+        for (var i = 0; i < toolbarStrings.Length; i++)
         {
-            GUIStyle curStyle = recording || (replaying && i == 0) || loading ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
+            var disabled = recording || (replaying && i == 0) || (i == 2 && noRecordLoaded) || loading; 
+            var curStyle = disabled ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
+            
             if (i == (int)currentTab)
             {
                 curStyle = stylesManager.tabButtonsStyleSelected;
             }
+
+            var prevEnabled = GUI.enabled;
+            GUI.enabled = !disabled;
+            
             if (GUILayout.Button(toolbarStrings[i], curStyle))
             {
                 newTab = (GUITab)i;
             }
+
+            GUI.enabled = prevEnabled;
         }
         if (!recording && !(replaying && newTab==GUITab.TabRecord) && !loading && currentTab != newTab)
         {
