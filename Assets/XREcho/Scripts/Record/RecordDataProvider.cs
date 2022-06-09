@@ -17,9 +17,11 @@ public class RecordDataProvider : MonoBehaviour, IRecordDataProvider
     
     public void LoadAllProjectRecordsData(out List<List<Vector3>> positions, out List<List<float>> timestamps, out List<float> totalDurations)
     {
-        var projectFolder = Path.Combine(_config.GetRecordingsFolder(), _config.project);
+        var projectFolder = Path.Combine(_config.GetRecordingsFolder(), _replayManager.replayProject);
         var projectDirectory = new DirectoryInfo(projectFolder);
         var sessionsDirectories = projectDirectory.GetDirectories();
+        
+        Debug.Log(projectFolder);
         
         var recordIdx = 0;
         positions = new List<List<Vector3>>();
@@ -34,7 +36,7 @@ public class RecordDataProvider : MonoBehaviour, IRecordDataProvider
             {
                 var data = CSVReader.ReadCSV(objectsDataFile.FullName);
                 var totalDuration = Convert.ToSingle(data[data.Count - 1]["timestamp"]);
-                
+
                 positions.Add(new List<Vector3>());
                 timestamps.Add(new List<float>());
                 totalDurations.Add(totalDuration);

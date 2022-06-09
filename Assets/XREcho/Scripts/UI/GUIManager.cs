@@ -59,9 +59,6 @@ public class GUIManager : MonoBehaviour
     private bool needReplayListUpdate;
     private int nextFFMode;
     private float readerSliderValue;
-    private string replayProject;
-    private string replaySession;
-    private string replayRecord;
     private CustomGUIDropdown replayProjectDropdown;
     private CustomGUIDropdown replaySessionDropdown;
     private CustomGUIDropdown replayRecordDropdown;
@@ -100,9 +97,10 @@ public class GUIManager : MonoBehaviour
         displayGazeVisu = recordingManager.recordEyeTracking;
         needReplayListUpdate = false;
         nextFFMode = 0;
-        replayProject = "";
-        replaySession = "";
-        replayRecord = "";
+
+        replayManager.replayProject = "";
+        replayManager.replaySession = "";
+        replayManager.replayRecord = "";
 
         displaySceneTHM = false;
 
@@ -125,8 +123,8 @@ public class GUIManager : MonoBehaviour
         if (shouldEndLoading)
         {
             shouldEndLoading = false;
-            string root = Path.Combine(config.GetRecordingsFolder(), replayProject);
-            root = Path.Combine(root, replaySession);
+            string root = Path.Combine(config.GetRecordingsFolder(), replayManager.replayProject);
+            root = Path.Combine(root, replayManager.replaySession);
             int recId = replayRecordDropdown.SelectedId;
             replayManager.ReadRecording(root, recId);
             ActivateGazeVisu();
@@ -181,18 +179,27 @@ public class GUIManager : MonoBehaviour
         GUILayout.EndVertical();
 
         GUILayout.EndVertical();
-
+        
+        var pad = stylesManager.tabButtonsStyle.padding.top + 1;
+        var offset = guiWidth / toolbarStrings.Length;
+        
         if (recording)
         {
-            DisplayToolbarIcon(stylesManager.recSprite.texture, 0, true);
+            var x = pad - (int)currentTab + (int) offset * (int)currentTab;
+            var y = pad;
+            DisplayToolbarIcon(stylesManager.recSprite.texture, x, y, true);
         }
         if (replaying)
         {
-            DisplayToolbarIcon(!paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, 1, true);
+            var x = pad - 1 + (int) offset;
+            var y = pad;
+            DisplayToolbarIcon(!paused ? stylesManager.playSprite.texture : stylesManager.pauseSprite.texture, x, y, true);
         }
         if (loading)
         {
-            DisplayLoadingIcon();
+            var x = pad - (int)currentTab + (int) offset * (int)currentTab;
+            var y = pad;
+            DisplayToolbarIcon(stylesManager.loadingSprite.texture, x, y, false, true);
         }
 
         if (GUILayout.Button("Quit Application", IsADropdownDisplayed() ? stylesManager.noHoverStyle : "button"))
@@ -300,7 +307,10 @@ public class GUIManager : MonoBehaviour
     private void ReplayGUI()
     {
         string root = config.GetRecordingsFolder();
-        if (currentTabHasChanged)
+
+        var noRecordLoaded = replayManager.objectsData == null || replayManager.objectsData.Count == 0;
+        
+        if (currentTabHasChanged && noRecordLoaded)
         {
             SetCurrentCamera(true);
 
@@ -308,29 +318,31 @@ public class GUIManager : MonoBehaviour
             if (!replayProjectDropdown.SetSelectedEntry(project))
             {
                 Debug.LogWarning("No records corresponding to the current project have been found.");
-                replayProjectDropdown.SetSelectedEntry(replayProject);
+                replayProjectDropdown.SetSelectedEntry(replayManager.replayProject);
             }
+            
+            Debug.Log("Auto-selected last recorded session.");
         }
         LabeledDropdown(" Project:  ", replayProjectDropdown);
         string curReplayProject = replayProjectDropdown.GetCurrentEntry();
         root = Path.Combine(root, curReplayProject);
-
-        if (curReplayProject != replayProject)
+        
+        if (curReplayProject != replayManager.replayProject)
         {
-            replayProject = curReplayProject;
+            replayManager.replayProject = curReplayProject;
             replaySessionDropdown = new CustomGUIDropdown(Utils.GetSubfolders(root));
             if (!replaySessionDropdown.SetSelectedEntry(session))
             {
-                replaySessionDropdown.SetSelectedEntry(replaySession);
+                replaySessionDropdown.SetSelectedEntry(replayManager.replaySession);
             }
         }
         LabeledDropdown("Session:  ", replaySessionDropdown);
         string curReplaySession = replaySessionDropdown.GetCurrentEntry();
         root = Path.Combine(root, curReplaySession);
 
-        if (curReplaySession != replaySession || needReplayListUpdate)
+        if (curReplaySession != replayManager.replaySession || needReplayListUpdate)
         {
-            replaySession = curReplaySession;
+            replayManager.replaySession = curReplaySession;
 
             List<string> recordsNames = new List<string>();
             char sep = config.filenameFieldsSeparator;
@@ -343,9 +355,9 @@ public class GUIManager : MonoBehaviour
         int recId = LabeledDropdown(" Record:  ", replayRecordDropdown);
         string curReplayRecord = replayRecordDropdown.GetCurrentEntry();
 
-        if (curReplayRecord != replayRecord && curReplayRecord != "--- empty list ---")
+        if (curReplayRecord != replayManager.replayRecord && curReplayRecord != "--- empty list ---")
         {
-            replayRecord = curReplayRecord;
+            replayManager.replayRecord = curReplayRecord;
             currentTurningAngle = 0;
             readerSliderValue = 0;
 
@@ -521,8 +533,8 @@ public class GUIManager : MonoBehaviour
 
     private void AsyncLoad()
     {
-        string root = Path.Combine(config.GetRecordingsFolder(), replayProject);
-        root = Path.Combine(root, replaySession);
+        string root = Path.Combine(config.GetRecordingsFolder(), replayManager.replayProject);
+        root = Path.Combine(root, replayManager.replaySession);
         int recId = replayRecordDropdown.SelectedId;
         replayManager.ReadObjectsDataFile(root, recId);
         shouldEndLoading = true;
@@ -534,18 +546,28 @@ public class GUIManager : MonoBehaviour
     {
         GUILayout.BeginHorizontal();
 
-        GUITab newTab = currentTab;
-        for (int i = 0; i < toolbarStrings.Length; i++)
+        var noRecordLoaded = replayManager.objectsData == null || replayManager.objectsData.Count == 0;
+        
+        var newTab = currentTab;
+        for (var i = 0; i < toolbarStrings.Length; i++)
         {
-            GUIStyle curStyle = recording || (replaying && i == 0) || loading ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
+            var disabled = recording || (replaying && i == 0) || (i == 2 && noRecordLoaded) || loading; 
+            var curStyle = disabled ? stylesManager.tabButtonsStyleBlocked : stylesManager.tabButtonsStyle;
+            
             if (i == (int)currentTab)
             {
                 curStyle = stylesManager.tabButtonsStyleSelected;
             }
+
+            var prevEnabled = GUI.enabled;
+            GUI.enabled = !disabled;
+            
             if (GUILayout.Button(toolbarStrings[i], curStyle))
             {
                 newTab = (GUITab)i;
             }
+
+            GUI.enabled = prevEnabled;
         }
         if (!recording && !(replaying && newTab==GUITab.TabRecord) && !loading && currentTab != newTab)
         {
@@ -556,26 +578,16 @@ public class GUIManager : MonoBehaviour
         GUILayout.EndHorizontal();
     }
 
-    private void DisplayToolbarIcon(Texture icon, int tabId, bool blink = false, bool turnAround = false)
+    private void DisplayToolbarIcon(Texture icon, int x, int y, bool blink = false, bool turnAround = false)
     {
-        Matrix4x4 matrixBackup = GUI.matrix;
+        var matrixBackup = GUI.matrix;
         GUI.color = new Color(1.0f, 1.0f, 1.0f, blink ? GetBlinkingAlpha() : 1.0f);
-        int siz = (int)stylesManager.tabButtonsStyle.lineHeight;
-        int pad = stylesManager.tabButtonsStyle.padding.top + 1;
-        float offset = guiWidth / toolbarStrings.Length;
-        int x = pad - tabId + (int)offset * tabId;
-        Vector2 pivotPoint = new Vector2(x + siz / 2, pad + siz / 2);
+        var size = (int)stylesManager.tabButtonsStyle.lineHeight;
+        var pivotPoint = new Vector2(x + size / 2, y + size / 2);
         if (turnAround) GUIUtility.RotateAroundPivot(GetTurningAngle(), pivotPoint);
-
-        GUI.Box(new Rect(x, pad, siz, siz), icon, GUIStyle.none);
-
+        GUI.Box(new Rect(x, y, size, size), icon, GUIStyle.none);
         if (turnAround) GUI.matrix = matrixBackup;
         GUI.color = Color.white;
-    }
-
-    private void DisplayLoadingIcon()
-    {
-        DisplayToolbarIcon(stylesManager.loadingSprite.texture, (int)currentTab, false, true);
     }
 
     private float GetBlinkingAlpha()

@@ -209,6 +209,14 @@ public class RecordingManager : MonoBehaviour
                 }
             }
         }
+        else if(!recordEyeTracking && eyeTracker != null)
+        {
+            EditorApplication.delayCall += () =>
+            {
+                DestroyImmediate(eyeTracker);
+            };
+            
+        }
         ComputeAllTrackedObjects();
 #endif
     }
@@ -346,12 +354,14 @@ public class RecordingManager : MonoBehaviour
     {
         if (Camera.main != null)
             AddTrackedObject(Camera.main.gameObject);
+        
         if (recordEyeTracking)
         {
             AddTrackedObject(eyeTracker);
             if (eyeTracker == null)
                 Debug.LogError("EyeTracker object not found : eye tracking datas will not be recorded.");
-        } else
+        }
+        else
         {
             RemoveTrackedObject(eyeTracker);
         }
