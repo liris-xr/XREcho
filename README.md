@@ -1,3 +1,5 @@
+> :warning: **XREcho is no longer maintained, please consider using [PLUME](https://github.com/liris-xr/PLUME) instead.**
+
 <p align="center"><img width="80%" src="xrecho_logo.png" alt="XREcho logo"></p>
 <p align="center"><a href="https://www.flaticon.com/free-icons/virtual-reality" style="color: lightgray" title="virtual reality icons">HMD icon created by AB Design - Flaticon</a></p>
 
